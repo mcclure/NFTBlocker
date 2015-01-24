@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+
+  "name": "Twitter Block Chain",
+  "description": "Blocks all users on a following/follwers page.",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "chain.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "https://twitter.com/"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.twitter.com/*","https://twitter.com/*"],
+      "css": ["content.css"],
+      "js": ["Queue.js","jquery-1.11.2.min.js","blockchain.js"]
+    }
+  ]
+}
