@@ -1,14 +1,31 @@
-$(".ProfileNav .UserActions").append('<button class=" btn" type="button"><span id="blockAllUsers" class="button-text">Block All</span></button>');
+$(".ProfileNav .UserActions .user-actions").append('<button class="user-actions-follow-button btn" type="button"><span id="blockAllUsers" class="button-text blocked-text">Block All</span></button>');
 var usersBlocked = 0,
     usersFound = 0,
+    usersSkipped = 0,
     totalCount = 0,
     errors = 0;
-$("#blockAllUsers").click(function() {
+var scrollerInterval = false,
+    finderInterval = false,
+    blockerInterval = false;
+var userQueue = new Queue();
+
+chrome.runtime.onMessage.addListener(
+function(request, sender, sendResponse) {
+    if (request.blockChainStart)
+        startBlockChain();
+    sendResponse({ack: true});
+});
+$("#blockAllUsers").click(startBlockChain);
+function startBlockChain() {
+    var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
+    if (!result)
+        return;
     showDialog();
     var scrollerInterval = setInterval(function() {
         window.scroll(0, $(document).height());
         if ($(".GridTimeline-end.has-more-items").length==0) {
             clearInterval(scrollerInterval);
+            scrollerInterval = false;
             doBlocking();
             totalCount = $(".ProfileCard").length;
             $("#blockchain-dialog .totalCount").text(totalCount);
@@ -16,8 +33,10 @@ $("#blockAllUsers").click(function() {
     },500);
     var finderInterval = setInterval(function() {
         doBlocking();
-        if (usersFound==totalCount && totalCount > 0)
+        if (usersFound==totalCount && totalCount > 0) {
             clearInterval(finderInterval);
+            finderInterval = false;
+        }
     },1000);
     var blockerInterval = setInterval(function() {
         var user = userQueue.dequeue();
@@ -35,26 +54,31 @@ $("#blockAllUsers").click(function() {
                     user_id: user.id
                 }
             }).done(function(response) {
-                console.log(response);
+                //console.log(response);
             }).fail(function(xhr, text, err) {
                 errors++;
                 $("#blockchain-dialog .errorCount").text(errors);
-                console.log(xhr);
+                //console.log(xhr);
             }).always(function() {
                 usersBlocked++;
                 $("#blockchain-dialog .usersBlocked").text(usersBlocked);
-                if (usersBlocked == totalCount)
+                if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
                     clearInterval(blockerInterval);
+                    blockerInterval = false;
+                }
             });
         }
     },40);
-});
-
-var userQueue = new Queue();
+}
 
 function doBlocking() {
     $(".ProfileCard:not(.blockchain-added)").each(function(i,e) {
         $(e).addClass("blockchain-added");
+        if ($(e).find('.user-actions.following, .user-actions.blocked').length > 0) {
+            usersSkipped++;
+            $("#blockchain-dialog .usersSkipped").text(usersSkipped);
+            return true;
+        }
         usersFound++;
         $("#blockchain-dialog .usersFound").text(usersFound);
         userQueue.enqueue({
@@ -62,7 +86,6 @@ function doBlocking() {
             id: $(e).data('user-id')
         });
     });
-    console.log($(".ProfileCard").length);
 }
 
 function showDialog() {
@@ -76,6 +99,7 @@ function showDialog() {
 		'</div>'+
 		'<div class="report-form">'+
             '<p>Found: <span class="usersFound"></span></p>'+
+            '<p>Skipped: <span class="usersSkipped"></span></p>'+
             '<p>Blocked: <span class="usersBlocked"></span></p>'+
             '<p>Total: <span class="totalCount"></span></p>'+
             '<p>Errors: <span class="errorCount"></span></p>'+
@@ -95,6 +119,10 @@ function showDialog() {
 '</div>'
     );
     $("#blockchain-dialog").show().find("button").click(function() {
+        if (blockerInterval)
+            clearInterval(blockerInterval);
+            clearInterval(scrollerInterval);
+            clearInterval(finderInterval);
         $("#blockchain-dialog").hide();
     });
 }
