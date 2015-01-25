@@ -12,3 +12,7 @@ In the current version of the extension, the Block All button will only appear a
 Web twitter uses history modification to change the address bar, rather than hard links to new pages. So the Block All button
 is never injected. This should be fixed in a future version. The plugin can still be activated by clicking the extension's icon
 near the omnibox.
+
+I'm trying to use this as an unpacked extension and it isn't working?
+
+You'll need to include jquery-1.11.2.min.js in the project folder.
