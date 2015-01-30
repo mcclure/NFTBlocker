@@ -23,7 +23,7 @@ function startBlockChain() {
     if (!result)
         return;
     showDialog();
-    var scrollerInterval = setInterval(function() {
+    scrollerInterval = setInterval(function() {
         window.scroll(0, $(document).height());
         if ($(".GridTimeline-end.has-more-items").length==0) {
             clearInterval(scrollerInterval);
@@ -33,42 +33,44 @@ function startBlockChain() {
             $("#blockchain-dialog .totalCount").text(totalCount);
         }
     },500);
-    var finderInterval = setInterval(function() {
+    finderInterval = setInterval(function() {
         doBlocking();
         if (usersFound==totalCount && totalCount > 0) {
             clearInterval(finderInterval);
             finderInterval = false;
         }
     },1000);
-    var blockerInterval = setInterval(function() {
-        var user = userQueue.dequeue();
-        if (typeof user !== "undefined") {
-            $.ajax({
-                url: "https://twitter.com/i/user/block",
-                method: "POST",
-                dataType: 'json',
-                data: {
-                    authenticity_token: $("#signout-form input.authenticity_token").val(),
-                    block_user: true,
-                    impression_id: "",
-                    report_type: "",
-                    screen_name: user.name,
-                    user_id: user.id
-                }
-            }).done(function(response) {
-                //console.log(response);
-            }).fail(function(xhr, text, err) {
-                errors++;
-                $("#blockchain-dialog .errorCount").text(errors);
-                //console.log(xhr);
-            }).always(function() {
-                usersBlocked++;
-                $("#blockchain-dialog .usersBlocked").text(usersBlocked);
-                if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
-                    clearInterval(blockerInterval);
-                    blockerInterval = false;
-                }
-            });
+    blockerInterval = setInterval(function() {
+        for (var i=0;i<4;i++) {
+            var user = userQueue.dequeue();
+            if (typeof user !== "undefined") {
+                $.ajax({
+                    url: "https://twitter.com/i/user/block",
+                    method: "POST",
+                    dataType: 'json',
+                    data: {
+                        authenticity_token: $("#signout-form input.authenticity_token").val(),
+                        block_user: true,
+                        impression_id: "",
+                        report_type: "",
+                        screen_name: user.name,
+                        user_id: user.id
+                    }
+                }).done(function(response) {
+                    //console.log(response);
+                }).fail(function(xhr, text, err) {
+                    errors++;
+                    $("#blockchain-dialog .errorCount").text(errors);
+                    //console.log(xhr);
+                }).always(function() {
+                    usersBlocked++;
+                    $("#blockchain-dialog .usersBlocked").text(usersBlocked);
+                    if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
+                        clearInterval(blockerInterval);
+                        blockerInterval = false;
+                    }
+                });
+            }
         }
     },40);
 }
@@ -97,7 +99,7 @@ function showDialog() {
 	'<div class="modal modal-medium draggable" id="block-or-report-dialog-dialog" role="dialog" aria-labelledby="block-or-report-dialog-header" style="top: 240px; left: 470px;"><div class="js-first-tabstop" tabindex="0"></div>'+
 	'<div class="modal-content" role="document">'+
 		'<div class="modal-header">'+
-			'<h3 class="modal-title report-title" id="blockchain-dialog-header">Block All Report</h3>'+
+			'<h3 class="modal-title report-title" id="blockchain-dialog-header">Twitter Block Chain</h3>'+
 		'</div>'+
 		'<div class="report-form">'+
             '<p>Found: <span class="usersFound"></span></p>'+
@@ -121,10 +123,9 @@ function showDialog() {
 '</div>'
     );
     $("#blockchain-dialog").show().find("button").click(function() {
-        if (blockerInterval)
-            clearInterval(blockerInterval);
-            clearInterval(scrollerInterval);
-            clearInterval(finderInterval);
+        clearInterval(blockerInterval);
+        clearInterval(scrollerInterval);
+        clearInterval(finderInterval);
         $("#blockchain-dialog").hide();
     });
 }

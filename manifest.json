@@ -2,8 +2,8 @@
   "manifest_version": 2,
 
   "name": "Twitter Block Chain",
-  "description": "Blocks all users on a following/follwers page.",
-  "version": "1.0",
+  "description": "Blocks all users on a following/followers page.",
+  "version": "1.2",
   "icons": { 
 	"16": "icon16.png",
     "48": "icon48.png",
