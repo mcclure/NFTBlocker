@@ -3,9 +3,11 @@ $(".ProfileNav .UserActions .user-actions").append('<button class="user-actions-
 */
 var usersBlocked = 0,
     usersFound = 0,
+    usersAlreadyBlocked = 0,
     usersSkipped = 0,
     totalCount = 0,
     errors = 0;
+var batchBlockCount = 5;
 var scrollerInterval = false,
     finderInterval = false,
     blockerInterval = false;
@@ -41,7 +43,7 @@ function startBlockChain() {
         }
     },1000);
     blockerInterval = setInterval(function() {
-        for (var i=0;i<4;i++) {
+        for (var i=0;i<batchBlockCount;i++) {
             var user = userQueue.dequeue();
             if (typeof user !== "undefined") {
                 $.ajax({
@@ -78,9 +80,14 @@ function startBlockChain() {
 function doBlocking() {
     $(".ProfileCard:not(.blockchain-added)").each(function(i,e) {
         $(e).addClass("blockchain-added");
-        if ($(e).find('.user-actions.following, .user-actions.blocked').length > 0) {
+        if ($(e).find('.user-actions.following').length > 0) {
             usersSkipped++;
             $("#blockchain-dialog .usersSkipped").text(usersSkipped);
+            return true;
+        }
+        if ($(e).find('.user-actions.blocked').length > 0) {
+            usersAlreadyBlocked++;
+            $("#blockchain-dialog .usersAlreadyBlocked").text(usersAlreadyBlocked);
             return true;
         }
         usersFound++;
@@ -104,6 +111,7 @@ function showDialog() {
 		'<div class="report-form">'+
             '<p>Found: <span class="usersFound"></span></p>'+
             '<p>Skipped: <span class="usersSkipped"></span></p>'+
+            '<p>Already Blocked: <span class="usersAlreadyBlocked"></span></p>'+
             '<p>Blocked: <span class="usersBlocked"></span></p>'+
             '<p>Total: <span class="totalCount"></span></p>'+
             '<p>Errors: <span class="errorCount"></span></p>'+
