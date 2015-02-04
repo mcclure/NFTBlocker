@@ -56,11 +56,13 @@ function renderStatus(statusText) {
 document.addEventListener('DOMContentLoaded', function() {
   getCurrentTabUrl(function(url) {
     console.log(url);
-    if (url.match(/https\:\/\/twitter\.com\/[\w\d]+\/(followers|following)/)) {
+    if (url.match(/^https\:\/\/twitter\.com/)) {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-          chrome.tabs.sendMessage(tabs[0].id, {blockChainStart: true}, function(response) {
-            console.log(response);
-          });
+            chrome.tabs.sendMessage(tabs[0].id, {blockChainStart: true}, function(response) {
+                console.log(response);
+                if (typeof response !== "undefined" && typeof response.error !== "undefined")
+                    renderStatus(response.error_description);
+            });
         });
     }
     else {

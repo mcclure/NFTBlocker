@@ -15,9 +15,15 @@ var userQueue = new Queue();
 
 chrome.runtime.onMessage.addListener(
 function(request, sender, sendResponse) {
-    if (request.blockChainStart)
-        startBlockChain();
-    sendResponse({ack: true});
+    if (request.blockChainStart) {
+        if ($(".GridTimeline .ProfileCard").length > 0) {
+            sendResponse({ack: true});
+            startBlockChain();
+        }
+        else {
+            sendResponse({error: true, error_description: 'Navigate to a twitter following or followers page.'});
+        }
+    }
 });
 $("#blockAllUsers").click(startBlockChain);
 function startBlockChain() {
