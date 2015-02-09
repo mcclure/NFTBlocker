@@ -1,6 +1,3 @@
-/*
-$(".ProfileNav .UserActions .user-actions").append('<button class="user-actions-follow-button btn" type="button"><span id="blockAllUsers" class="button-text blocked-text">Block All</span></button>');
-*/
 var usersBlocked = 0,
     usersFound = 0,
     usersAlreadyBlocked = 0,
