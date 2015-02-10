@@ -8,3 +8,7 @@ By navigating to a user's followers (or following) page and activating the plugi
 I'm trying to use this as an unpacked extension and it isn't working?
 
 You'll need to include jquery-1.11.2.min.js in the project folder.
+
+How do I stop the blocking?
+
+Click the X in the top right corner of the blocking report to stop all blocking. Note that this will not unblock any users you have already blocked.
