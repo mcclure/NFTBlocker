@@ -137,6 +137,18 @@ function showDialog() {
         clearInterval(blockerInterval);
         clearInterval(scrollerInterval);
         clearInterval(finderInterval);
+        usersBlocked = 0;
+        usersFound = 0;
+        usersAlreadyBlocked = 0;
+        usersSkipped = 0;
+        totalCount = 0;
+        errors = 0;
+        $("#blockchain-dialog .usersFound").text(usersFound);
+        $("#blockchain-dialog .usersSkipped").text(usersSkipped);
+        $("#blockchain-dialog .usersAlreadyBlocked").text(usersAlreadyBlocked);
+        $("#blockchain-dialog .usersBlocked").text(usersBlocked);
+        $("#blockchain-dialog .totalCount").text(totalCount);
+        $("#blockchain-dialog .errorCount").text(errors);
         $("#blockchain-dialog").hide();
     });
 }
