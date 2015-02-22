@@ -13,7 +13,7 @@ var userQueue = new Queue();
 chrome.runtime.onMessage.addListener(
 function(request, sender, sendResponse) {
     if (request.blockChainStart) {
-        if ($(".GridTimeline .ProfileCard").length > 0) {
+        if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0) {
             sendResponse({ack: true});
             startBlockChain();
         }
