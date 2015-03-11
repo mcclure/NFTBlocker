@@ -16,3 +16,9 @@ Browse to a following/followers page on twitter and click the icon in the toolba
 How do I stop the blocking?
 
 Click the X in the top right corner of the blocking report to stop all blocking. Note that this will not unblock any users you have already blocked.
+
+# To Do / Possible Features
+
+* Output a JSON object of users from a page, to later feed into the extension.
+* Maintain a database of users that have been blocked by this tool, and the user they were connected to when blocked.
+* Whitelist 
