@@ -23,11 +23,9 @@ function(request, sender, sendResponse) {
     }
 });
 $("#blockAllUsers").click(startBlockChain);
-function startBlockChain() {
-    var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
-    if (!result)
-        return;
-    showDialog();
+function startAccountFinder(callback) {
+    var finderCompleted = false;
+    var scrollerCompleted = false;
     scrollerInterval = setInterval(function() {
         window.scroll(0, $(document).height());
         if ($(".GridTimeline-end.has-more-items").length==0) {
@@ -36,6 +34,9 @@ function startBlockChain() {
             doBlocking();
             totalCount = $(".ProfileCard").length;
             $("#blockchain-dialog .totalCount").text(totalCount);
+            scrollerCompleted = true;
+            if (finderCompleted && scrollerCompleted && callback)
+                callback();
         }
     },500);
     finderInterval = setInterval(function() {
@@ -43,8 +44,18 @@ function startBlockChain() {
         if (usersFound==totalCount && totalCount > 0) {
             clearInterval(finderInterval);
             finderInterval = false;
+            finderCompleted = true;
+            if (finderCompleted && scrollerCompleted && callback)
+                callback();
         }
     },1000);
+}
+function startBlockChain() {
+    var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
+    if (!result)
+        return;
+    showDialog();
+    startAccountFinder();
     blockerInterval = setInterval(function() {
         for (var i=0;i<batchBlockCount;i++) {
             var user = userQueue.dequeue();
@@ -79,6 +90,7 @@ function startBlockChain() {
         }
     },40);
 }
+
 
 function doBlocking() {
     $(".ProfileCard:not(.blockchain-added)").each(function(i,e) {
