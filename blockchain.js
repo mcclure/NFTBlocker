@@ -31,7 +31,7 @@ function startAccountFinder(callback) {
         if ($(".GridTimeline-end.has-more-items").length==0) {
             clearInterval(scrollerInterval);
             scrollerInterval = false;
-            doBlocking();
+            addUsersToBlockQueue();
             totalCount = $(".ProfileCard").length;
             $("#blockchain-dialog .totalCount").text(totalCount);
             scrollerCompleted = true;
@@ -40,7 +40,7 @@ function startAccountFinder(callback) {
         }
     },500);
     finderInterval = setInterval(function() {
-        doBlocking();
+        addUsersToBlockQueue();
         if (usersFound==totalCount && totalCount > 0) {
             clearInterval(finderInterval);
             finderInterval = false;
@@ -50,49 +50,54 @@ function startAccountFinder(callback) {
         }
     },1000);
 }
+function startBlocker() {
+    blockerInterval = setInterval(function() {
+        for (var i=0;i<batchBlockCount;i++) {
+            var user = userQueue.dequeue();
+            if (typeof user !== "undefined") {
+                doBlock($("#signout-form input.authenticity_token").val(), user.id, user.name);
+        }
+    },40);
+}
+function doBlock(authenticity_token, user_id, user_name, callback) {
+    $.ajax({
+            url: "https://twitter.com/i/user/block",
+            method: "POST",
+            dataType: 'json',
+            data: {
+                authenticity_token: authenticity_token,
+                block_user: true,
+                impression_id: "",
+                report_type: "",
+                screen_name: user_name,
+                user_id: user_id
+            }
+        }).done(function(response) {
+            //console.log(response);
+        }).fail(function(xhr, text, err) {
+            errors++;
+            $("#blockchain-dialog .errorCount").text(errors);
+            //console.log(xhr);
+        }).always(function() {
+            usersBlocked++;
+            $("#blockchain-dialog .usersBlocked").text(usersBlocked);
+            if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
+                clearInterval(blockerInterval);
+                blockerInterval = false;
+            }
+        });
+    }
+}
 function startBlockChain() {
     var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
     if (!result)
         return;
     showDialog();
     startAccountFinder();
-    blockerInterval = setInterval(function() {
-        for (var i=0;i<batchBlockCount;i++) {
-            var user = userQueue.dequeue();
-            if (typeof user !== "undefined") {
-                $.ajax({
-                    url: "https://twitter.com/i/user/block",
-                    method: "POST",
-                    dataType: 'json',
-                    data: {
-                        authenticity_token: $("#signout-form input.authenticity_token").val(),
-                        block_user: true,
-                        impression_id: "",
-                        report_type: "",
-                        screen_name: user.name,
-                        user_id: user.id
-                    }
-                }).done(function(response) {
-                    //console.log(response);
-                }).fail(function(xhr, text, err) {
-                    errors++;
-                    $("#blockchain-dialog .errorCount").text(errors);
-                    //console.log(xhr);
-                }).always(function() {
-                    usersBlocked++;
-                    $("#blockchain-dialog .usersBlocked").text(usersBlocked);
-                    if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
-                        clearInterval(blockerInterval);
-                        blockerInterval = false;
-                    }
-                });
-            }
-        }
-    },40);
+    startBlocker();
 }
 
-
-function doBlocking() {
+function addUsersToBlockQueue() {
     $(".ProfileCard:not(.blockchain-added)").each(function(i,e) {
         $(e).addClass("blockchain-added");
         if ($(e).find('.user-actions.following').length > 0) {
