@@ -9,6 +9,9 @@ var scrollerInterval = false,
     finderInterval = false,
     blockerInterval = false;
 var userQueue = new Queue();
+var currentProfileName = "";
+
+var queuedStorage = {};
 
 chrome.runtime.onMessage.addListener(
 function(request, sender, sendResponse) {
@@ -23,6 +26,9 @@ function(request, sender, sendResponse) {
     }
 });
 $("#blockAllUsers").click(startBlockChain);
+function getProfileUsername() {
+    return $(".ProfileSidebar .ProfileHeaderCard .ProfileHeaderCard-screenname a span").text();
+}
 function startAccountFinder(callback) {
     var finderCompleted = false;
     var scrollerCompleted = false;
@@ -56,42 +62,62 @@ function startBlocker() {
             var user = userQueue.dequeue();
             if (typeof user !== "undefined") {
                 doBlock($("#signout-form input.authenticity_token").val(), user.id, user.name);
+            }
         }
     },40);
 }
 function doBlock(authenticity_token, user_id, user_name, callback) {
     $.ajax({
-            url: "https://twitter.com/i/user/block",
-            method: "POST",
-            dataType: 'json',
-            data: {
-                authenticity_token: authenticity_token,
-                block_user: true,
-                impression_id: "",
-                report_type: "",
-                screen_name: user_name,
-                user_id: user_id
+        url: "https://twitter.com/i/user/block",
+        method: "POST",
+        dataType: 'json',
+        data: {
+            authenticity_token: authenticity_token,
+            block_user: true,
+            impression_id: "",
+            report_type: "",
+            screen_name: user_name,
+            user_id: String(user_id)
+        }
+    }).done(function(response) {
+        //console.log(response);
+        queuedStorage[user_name] = {following: currentProfileName, on: Date.now(), id: String(user_id)};
+    }).fail(function(xhr, text, err) {
+        errors++;
+        $("#blockchain-dialog .errorCount").text(errors);
+        //console.log(xhr);
+    }).always(function() {
+        usersBlocked++;
+        $("#blockchain-dialog .usersBlocked").text(usersBlocked);
+        if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
+            clearInterval(blockerInterval);
+            blockerInterval = false;
+            saveBlockingReceipts();
+        }
+    });
+}
+function saveBlockingReceipts() {
+    if (Object.keys(queuedStorage).length <= 0)
+        return;
+    chrome.storage.local.get("blockingReceipts",function(items) {
+        var receipts = items.blockingReceipts;
+        if (typeof receipts === "undefined")
+            receipts = {};
+        for (var idx in queuedStorage) {
+            if (!(idx in receipts)) {
+                receipts[idx] = queuedStorage[idx];
             }
-        }).done(function(response) {
-            //console.log(response);
-        }).fail(function(xhr, text, err) {
-            errors++;
-            $("#blockchain-dialog .errorCount").text(errors);
-            //console.log(xhr);
-        }).always(function() {
-            usersBlocked++;
-            $("#blockchain-dialog .usersBlocked").text(usersBlocked);
-            if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
-                clearInterval(blockerInterval);
-                blockerInterval = false;
-            }
+        }
+        chrome.storage.local.set({blockingReceipts: receipts},function() {
+            queuedStorage = {};
         });
-    }
+    });
 }
 function startBlockChain() {
     var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
     if (!result)
         return;
+    currentProfileName = getProfileUsername();
     showDialog();
     startAccountFinder();
     startBlocker();
@@ -114,7 +140,7 @@ function addUsersToBlockQueue() {
         $("#blockchain-dialog .usersFound").text(usersFound);
         userQueue.enqueue({
             name: $(e).data('screen-name'),
-            id: $(e).data('user-id')
+            id: String($(e).data('user-id'))
         });
     });
 }
@@ -160,6 +186,7 @@ function showDialog() {
         usersSkipped = 0;
         totalCount = 0;
         errors = 0;
+        saveBlockingReceipts();
         $("#blockchain-dialog .usersFound").text(usersFound);
         $("#blockchain-dialog .usersSkipped").text(usersSkipped);
         $("#blockchain-dialog .usersAlreadyBlocked").text(usersAlreadyBlocked);
