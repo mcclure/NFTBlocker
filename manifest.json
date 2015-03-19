@@ -14,10 +14,12 @@
     "default_popup": "popup.html"
   },
   "permissions": [
+	"contextMenus",
 	"storage",
     "activeTab",
     "https://twitter.com/"
   ],
+  "options_page": "options.html",
   "content_scripts": [
     {
       "matches": ["https://www.twitter.com/*","https://twitter.com/*"],
