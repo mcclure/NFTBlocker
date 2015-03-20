@@ -5,13 +5,13 @@ $(document).ready(function() {
         var dataset = [];
         for(var username in receipts) {
             var receipt = receipts[username];
-            dataset.push( [ username, receipt.following, new Date(receipt.on).toString() ] );
+            dataset.push( [ username, receipt.type + ": " + receipt.connection, new Date(receipt.on).toString() ] );
         }
         $('#receiptsTable').dataTable({
             "data": dataset,
             "columns": [
                 { "title": "Blocked User" },
-                { "title": "Following/Follower" },
+                { "title": "Connection To" },
                 { "title": "Date Blocked" }
             ]
         }); 

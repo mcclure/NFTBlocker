@@ -10,7 +10,7 @@ var scrollerInterval = false,
     blockerInterval = false;
 var userQueue = new Queue();
 var currentProfileName = "";
-
+var connectionType = "following";
 var queuedStorage = {};
 
 chrome.runtime.onMessage.addListener(
@@ -32,6 +32,12 @@ function getProfileUsername() {
 function startAccountFinder(callback) {
     var finderCompleted = false;
     var scrollerCompleted = false;
+    if ($(".ProfileNav-item.ProfileNav--item--following.is-active").length==1) {
+        connectionType = "followed by";
+    }
+    else {
+        connectionType = "following";
+    }
     scrollerInterval = setInterval(function() {
         window.scroll(0, $(document).height());
         if ($(".GridTimeline-end.has-more-items").length==0) {
@@ -81,7 +87,7 @@ function doBlock(authenticity_token, user_id, user_name, callback) {
         }
     }).done(function(response) {
         //console.log(response);
-        queuedStorage[user_name] = {following: currentProfileName, on: Date.now(), id: String(user_id)};
+        queuedStorage[user_name] = {type: connectionType, connection: currentProfileName, on: Date.now(), id: String(user_id)};
     }).fail(function(xhr, text, err) {
         errors++;
         $("#blockchain-dialog .errorCount").text(errors);
