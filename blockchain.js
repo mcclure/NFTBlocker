@@ -12,6 +12,7 @@ var userQueue = new Queue();
 var currentProfileName = "";
 var connectionType = "following";
 var queuedStorage = {};
+var whitelist = {};
 
 chrome.runtime.onMessage.addListener(
 function(request, sender, sendResponse) {
@@ -132,7 +133,8 @@ function startBlockChain() {
 function addUsersToBlockQueue() {
     $(".ProfileCard:not(.blockchain-added)").each(function(i,e) {
         $(e).addClass("blockchain-added");
-        if ($(e).find('.user-actions.following').length > 0) {
+        var username = $(e).data('screen-name');
+        if ($(e).find('.user-actions.following').length > 0 || username in whitelist) {
             usersSkipped++;
             $("#blockchain-dialog .usersSkipped").text(usersSkipped);
             return true;
@@ -145,7 +147,7 @@ function addUsersToBlockQueue() {
         usersFound++;
         $("#blockchain-dialog .usersFound").text(usersFound);
         userQueue.enqueue({
-            name: $(e).data('screen-name'),
+            name: username,
             id: String($(e).data('user-id'))
         });
     });
