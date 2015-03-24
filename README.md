@@ -22,7 +22,7 @@ How do I stop the blocking?
 Click the X in the top right corner of the blocking report to stop all 
 blocking. Note that this will not unblock any users you have already blocked.
 
-How do I figure out who I blocked, and who they were following/follwed by?
+How do I figure out who I blocked, and who they were following/followed by?
 
 Right click the extension icon in Chrome and click Options. You can view all 
 blocks made on this page, including searching by username. Blocks are stored 
