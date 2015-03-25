@@ -22,8 +22,8 @@
   "content_scripts": [
     {
       "matches": ["https://www.twitter.com/*","https://twitter.com/*"],
-      "css": ["content.css"],
-      "js": ["Queue.js","jquery-1.11.2.min.js","blockchain.js"]
+      "css": ["css/content.css"],
+      "js": ["js/Queue.js","bower_components/jquery/dist/jquery.min.js","js/blockchain.js"]
     }
   ]
 }

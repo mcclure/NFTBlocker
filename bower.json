@@ -1,0 +1,24 @@
+{
+  "name": "twitter-block-chain",
+  "main": "blockchain.js",
+  "version": "1.4.0",
+  "homepage": "https://github.com/satsukitv/twitter-block-chain",
+  "authors": [
+    "Charlie <me@satsuki.tv>"
+  ],
+  "description": "Chrome extension that enables twitter users to block everyone that follows, or is followed by another twitter user.",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.3.15",
+    "bootstrap": "~3.3.4",
+	"jquery": "~2.1.3"
+  }
+}
