@@ -3,6 +3,48 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        "mozilla-addon-sdk": {
+            'latest': {
+                options: {
+                    revision: "latest", // default official revision 
+                    dest_dir: "build_tools/"
+                }
+            }
+        },
+        "mozilla-cfx-xpi": {
+            'stable': {
+                options: {
+                    "mozilla-addon-sdk": "latest",
+                    extension_dir: "firefox",
+                    dist_dir: "tmp/dist-stable"
+                }
+            },
+            'experimental': {
+                options: {
+                    "mozilla-addon-sdk": "latest",
+                    extension_dir: "firefox",
+                    dist_dir: "tmp/dist-experimental",
+                    strip_sdk: false // true by default 
+                }
+            },
+        },
+        "mozilla-cfx": {
+            'run_stable': {
+                options: {
+                    "mozilla-addon-sdk": "latest",
+                    extension_dir: "ff_extension",
+                    command: "run"
+                }
+            },
+            'run_experimental': {
+                options: {
+                    "mozilla-addon-sdk": "latest",
+                    extension_dir: "ff_extension",
+                    command: "run",
+                    pipe_output: true
+                }
+            }
+        },
         compress: {
             main: {
                 options: {
@@ -33,6 +75,7 @@ module.exports = function(grunt) {
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
 
     // Default task(s).
     grunt.registerTask('default', ['compress']);
