@@ -1,0 +1,16 @@
+<div kcd-recompile="should.refreshTable" use-boolean>
+	<table datatable="ng" class="row-border hover">
+		<thead>
+		<tr>
+			<th>Protected User</th>
+			<th>Date Protected</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr ng-repeat="user in protectedUsers">
+			<td>{{ user.username }}</td>
+			<td>{{ user.on | date:'medium' }}</td>
+		</tr>
+		</tbody>
+	</table>
+</div>

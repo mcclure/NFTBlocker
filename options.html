@@ -1,17 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="twBlockchain">
 <head>
 	<title>Twitter Block Chain Receipts</title>
 	<link rel="stylesheet" href="css/jquery.dataTables.min.css"/>
 	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="bower_components/datatables/media/css/jquery.dataTables.min.css"/>
 </head>
 <body>
-<table id="receiptsTable">
-
-</table>
-<script src="bower_components/angular/angular.min.js"></script>
-<script src="bower_components/jquery/dist/jquery.min.js"></script>
-<script src="js/jquery.dataTables.min.js"></script>
-<script src="js/options.js"></script>
+	<div class="container" ng-controller="NavigationController">
+		<ul class="nav nav-tabs">
+			<li role="presentation" ng-class="{active: isActive('receipts')}"><a href="#/receipts">Receipts</a></li>
+			<li role="presentation" ng-class="{active: isActive('protected')}"><a href="#/protected">Protected Users</a></li>
+			<li role="presentation" ng-class="{active: isActive('add-protection')}"><a href="#/add-protection">Add Protected User</a></li>
+		</ul>
+	</div>
+	<div class="container" ng-view></div>
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
+	<script src="bower_components/angular/angular.min.js"></script>
+	<script src="bower_components/angular-route/angular-route.min.js"></script>
+	<script src="bower_components/angular-datatables/dist/angular-datatables.min.js"></script>
+	<script src="js/options.js"></script>
 </body>
 </html>
