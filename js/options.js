@@ -41,15 +41,30 @@ optionsApp.controller('ProtectedController', ['$scope', function($scope) {
     $scope.should = {};
     $scope.should.refreshTable = false;
     
-    chrome.storage.sync.get("whitelist",function(items) {
+    chrome.storage.sync.get("protectedUsers",function(items) {
         var dataset=[];
-        for(var username in items.whitelist) {
-            var receipt = items.whitelist[username];
+        for(var username in items.protectedUsers) {
+            var receipt = items.protectedUsers[username];
             dataset.push( receipt );
         }
         $scope.protectedUsers = dataset;
         $scope.should.refreshTable = true;
     });
+    $scope.deleteProtection = function(user) {
+        var response = confirm("Are you sure you want to remove "+user.username+" from the protected users list?");
+        if (!response)
+            return;
+        chrome.storage.sync.get("protectedUsers",function(items) {
+            if (typeof items.protectedUsers === "undefined") {
+                items.protectedUsers = {};
+            }
+            delete items.protectedUsers[user.username];
+            chrome.storage.sync.set({ protectedUsers: items.protectedUsers }, function() {
+                $scope.protectedUsers = items.protectedUsers;
+                $scope.$apply();
+            });
+        });
+    }
 }]);
 optionsApp.controller('AddProtectionController', ['$scope', '$location', function($scope, $location) {
     $scope.user = {username: "", on: Date.now()};
@@ -60,12 +75,12 @@ optionsApp.controller('AddProtectionController', ['$scope', '$location', functio
             $scope.error = "You must enter a username";
             return;
         }
-        chrome.storage.sync.get("whitelist",function(items) {
-            if (typeof items.whitelist === "undefined") {
-                items.whitelist = {};
+        chrome.storage.sync.get("protectedUsers",function(items) {
+            if (typeof items.protectedUsers === "undefined") {
+                items.protectedUsers = {};
             }
-            items.whitelist[$scope.user.username] = $scope.user;
-            chrome.storage.sync.set({ whitelist: items.whitelist }, function() {
+            items.protectedUsers[$scope.user.username] = $scope.user;
+            chrome.storage.sync.set({ protectedUsers: items.protectedUsers }, function() {
                 $location.url('/protected');
                 $scope.$apply();
             });
