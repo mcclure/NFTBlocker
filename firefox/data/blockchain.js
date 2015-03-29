@@ -13,7 +13,7 @@ var currentProfileName = "";
 var connectionType = "following";
 var queuedStorage = {};
 var protectedUsers = {};
-
+/*
 chrome.runtime.onMessage.addListener(
 function(request, sender, sendResponse) {
     if (request.blockChainStart) {
@@ -25,6 +25,16 @@ function(request, sender, sendResponse) {
             sendResponse({error: true, error_description: 'Navigate to a twitter following or followers page.'});
         }
     }
+});
+*/
+self.port.on("blockChainStart", function(message) {
+    if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0) {
+            self.port.emit("ack",true);
+            startBlockChain();
+        }
+        else {
+            self.port.emit("error",'Navigate to a twitter following or followers page.');
+        }
 });
 $("#blockAllUsers").click(startBlockChain);
 function getProfileUsername() {
@@ -106,7 +116,7 @@ function doBlock(authenticity_token, user_id, user_name, callback) {
 function saveBlockingReceipts() {
     if (Object.keys(queuedStorage).length <= 0)
         return;
-    chrome.storage.local.get("blockingReceipts",function(items) {
+    //chrome.storage.local.get("blockingReceipts",function(items) {
         var receipts = items.blockingReceipts;
         if (typeof receipts === "undefined")
             receipts = {};
@@ -115,10 +125,10 @@ function saveBlockingReceipts() {
                 receipts[idx] = queuedStorage[idx];
             }
         }
-        chrome.storage.local.set({blockingReceipts: receipts},function() {
+        //chrome.storage.local.set({blockingReceipts: receipts},function() {
             queuedStorage = {};
-        });
-    });
+        //});
+    //});
 }
 function startBlockChain() {
     var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
@@ -126,10 +136,10 @@ function startBlockChain() {
         return;
     currentProfileName = getProfileUsername();
     showDialog();
-    chrome.storage.sync.get("protectedUsers",function(items) {
+    //chrome.storage.sync.get("protectedUsers",function(items) {
         startAccountFinder();
         startBlocker();
-    });
+    //});
 }
 
 function addUsersToBlockQueue() {

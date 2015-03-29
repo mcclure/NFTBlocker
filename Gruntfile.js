@@ -32,18 +32,19 @@ module.exports = function(grunt) {
             'run_stable': {
                 options: {
                     "mozilla-addon-sdk": "latest",
-                    extension_dir: "ff_extension",
+                    extension_dir: "firefox",
                     command: "run"
                 }
-            },
+            }
+            /*,
             'run_experimental': {
                 options: {
                     "mozilla-addon-sdk": "latest",
-                    extension_dir: "ff_extension",
+                    extension_dir: "firefox",
                     command: "run",
                     pipe_output: true
                 }
-            }
+            }*/
         },
         compress: {
             main: {
@@ -79,5 +80,5 @@ module.exports = function(grunt) {
 
     // Default task(s).
     grunt.registerTask('default', ['compress']);
-
+    grunt.registerTask('test-firefox', ['mozilla-cfx']);
 };
