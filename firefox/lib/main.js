@@ -18,6 +18,7 @@ popup.on('click', function() {
 
 var contextPanel = require("sdk/panel").Panel({
     contentURL: data.url("contextmenu.html"),
+    contentScriptFile: data.url("contextmenu.js"),
     onHide: handleHide
 });
 
@@ -25,8 +26,8 @@ function handleHide() {
     button.state('window', {checked: false});
 }
 
-contextPanel.on("click",function(option) {
-    if (option == "blockAll") {
+contextPanel.port.on("click",function(option) {
+    if (option == "activate") {
         var worker = findWorkerForCurrentTab();
         if (worker) {
             worker.port.emit("blockChainStart", true);
