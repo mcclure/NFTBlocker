@@ -37,7 +37,31 @@ contextPanel.port.on("click",function(option) {
         }
     }
     else {
-        require("sdk/tabs").open(data.url("options.html"));
+        require("sdk/tabs").open({
+            url: "options.html",
+            onReady: function(tab) {
+                var ss = require("sdk/simple-storage");
+                var worker = tab.attach({
+                    contentScriptFile: [
+                        data.url('bower_components/jquery/dist/jquery.js'),
+                        data.url('bower_components/datatables/media/js/jquery.dataTables.min.js'),
+                        data.url('bower_components/angular/angular.js'),
+                        data.url('bower_components/angular-route/angular-route.min.js'),
+                        data.url('bower_components/angular-datatables/dist/angular-datatables.min.js'),
+                        data.url('js/options.js')
+                    ]
+                });
+                worker.port.on("get",function(key) {
+                    worker.port.emit("getResult",ss.storage[key]);
+                });
+                worker.port.on("set",function(data) {
+                    for (var key in data) {
+                        ss.storage[key] = data[key];
+                    }
+                    worker.port.emit("setResult", true);
+                });
+            }
+        });
     }    
 });
 

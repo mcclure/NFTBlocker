@@ -1,0 +1,18 @@
+<div kcd-recompile="should.refreshTable" use-boolean>
+	<table datatable="ng" class="row-border hover">
+		<thead>
+		<tr>
+			<th>Blocked User</th>
+			<th>Connection To</th>
+			<th>Date Blocked</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr ng-repeat="receipt in ::receipts">
+			<td>{{ receipt.username }}</td>
+			<td>{{ receipt.type + ": " + receipt.connection }}</td>
+			<td>{{ receipt.on | date:'medium' }}</td>
+		</tr>
+		</tbody>
+	</table>
+</div>

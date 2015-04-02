@@ -106,19 +106,51 @@ function doBlock(authenticity_token, user_id, user_name, callback) {
 function saveBlockingReceipts() {
     if (Object.keys(queuedStorage).length <= 0)
         return;
-    chrome.storage.local.get("blockingReceipts",function(items) {
-        var receipts = items.blockingReceipts;
-        if (typeof receipts === "undefined")
-            receipts = {};
+    
+    if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
+        var ss = require("sdk/simple-storage");
+        if (typeof ss.storage.blockingReceipts === "undefined") {
+            ss.storage.blockingReceipts = {};
+        }
         for (var idx in queuedStorage) {
             if (!(idx in receipts)) {
-                receipts[idx] = queuedStorage[idx];
+                ss.storage.blockingReceipts[idx] = queuedStorage[idx];
             }
         }
-        chrome.storage.local.set({blockingReceipts: receipts},function() {
-            queuedStorage = {};
+        queuedStorage = {};
+    }
+    else {
+        chrome.storage.local.get("blockingReceipts",function(items) {
+            var receipts = items.blockingReceipts;
+            if (typeof receipts === "undefined")
+                receipts = {};
+            for (var idx in queuedStorage) {
+                if (!(idx in receipts)) {
+                    receipts[idx] = queuedStorage[idx];
+                }
+            }
+            chrome.storage.local.set({blockingReceipts: receipts},function() {
+                queuedStorage = {};
+            });
         });
-    });
+    }
+}
+function getProtectedUsers(callback) {
+    if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
+        var ss = require("sdk/simple-storage");
+        if (typeof ss.storage.protectedUsers === "undefined") {
+            ss.storage.protectedUsers = {};
+        }
+        callback(ss.storage.protectedUsers);
+    }
+    else {
+        chrome.storage.local.get("protectedUsers",function(items) {
+            var users = items.protectedUsers;
+            if (typeof users === "undefined")
+                users = {};
+            callback(users);
+        });
+    }
 }
 function startBlockChain() {
     var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
@@ -126,7 +158,7 @@ function startBlockChain() {
         return;
     currentProfileName = getProfileUsername();
     showDialog();
-    chrome.storage.sync.get("protectedUsers",function(items) {
+    getProtectedUsers(function(items) {
         startAccountFinder();
         startBlocker();
     });
