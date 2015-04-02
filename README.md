@@ -32,3 +32,4 @@ locally, and not synced to the cloud.
 
 * Output a JSON object of users from a page, to later feed into the extension.
 * Whitelist 
+* Option to mute users instead of blocking them.
