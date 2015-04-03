@@ -6,6 +6,7 @@ var pageMod = require("sdk/page-mod");
 var array = require('sdk/util/array');
 var workers = [];
 var self = require("sdk/self");
+var ss = require("sdk/simple-storage");
 
 var popup = require("sdk/panel").Panel({
     contentURL: data.url("popup.html"),
@@ -40,7 +41,6 @@ contextPanel.port.on("click",function(option) {
         require("sdk/tabs").open({
             url: "options.html",
             onReady: function(tab) {
-                var ss = require("sdk/simple-storage");
                 var worker = tab.attach({
                     contentScriptFile: [
                         data.url('bower_components/jquery/dist/jquery.js'),
@@ -107,6 +107,15 @@ pageMod.PageMod({
     onAttach: function(worker) {
         array.add(workers, this);
         worker.on('detach', function () { array.remove(workers, this); });
+        worker.port.on("get",function(key) {
+            worker.port.emit("getResult",ss.storage[key]);
+        });
+        worker.port.on("set",function(data) {
+            for (var key in data) {
+                ss.storage[key] = data[key];
+            }
+            worker.port.emit("setResult", true);
+        });
         //worker.on('pageshow', function() { array.add(workers, this); });
         //worker.on('pagehide', function() { array.remove(workers, this); });
     }

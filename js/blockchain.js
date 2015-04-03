@@ -14,18 +14,64 @@ var connectionType = "following";
 var queuedStorage = {};
 var protectedUsers = {};
 
-chrome.runtime.onMessage.addListener(
-function(request, sender, sendResponse) {
-    if (request.blockChainStart) {
+// firefox storage
+var savedCallback;
+var savedKey;
+function getLocal(key, callback) {
+    savedCallback = callback;
+    savedKey = key;
+    self.port.emit("get", key);
+}
+function setLocal(data, callback) {
+    savedCallback = callback;
+    self.port.emit("set", data);
+}
+function getSync(key, callback) {
+    savedCallback = callback;
+    savedKey = key;
+    self.port.emit("get", key);
+}
+function setSync(data, callback) {
+    savedCallback = callback;
+    self.port.emit("set", data);
+}
+
+
+if (typeof chrome !== "undefined") {
+    chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if (request.blockChainStart) {
+            if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0) {
+                sendResponse({ack: true});
+                startBlockChain();
+            }
+            else {
+                sendResponse({error: true, error_description: 'Navigate to a twitter following or followers page.'});
+            }
+        }
+    });
+}
+else {
+    self.port.on("blockChainStart", function(message) {
         if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0) {
-            sendResponse({ack: true});
-            startBlockChain();
-        }
-        else {
-            sendResponse({error: true, error_description: 'Navigate to a twitter following or followers page.'});
-        }
-    }
-});
+                self.port.emit("ack",true);
+                startBlockChain();
+            }
+            else {
+                self.port.emit("error",'Navigate to a twitter following or followers page.');
+            }
+    });
+    // firefox storage
+    self.port.on("getResult",function(data) {
+        var ret = {};
+        if (data !== null)
+            ret[savedKey] = data;
+        savedCallback(ret);
+    });
+    self.port.on("setResult",function(result) {
+        savedCallback();
+    });
+}
 $("#blockAllUsers").click(startBlockChain);
 function getProfileUsername() {
     return $(".ProfileSidebar .ProfileHeaderCard .ProfileHeaderCard-screenname a span").text();
@@ -108,16 +154,19 @@ function saveBlockingReceipts() {
         return;
     
     if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
-        var ss = require("sdk/simple-storage");
-        if (typeof ss.storage.blockingReceipts === "undefined") {
-            ss.storage.blockingReceipts = {};
-        }
-        for (var idx in queuedStorage) {
-            if (!(idx in receipts)) {
-                ss.storage.blockingReceipts[idx] = queuedStorage[idx];
+        getLocal("blockingReceipts", function(items) {
+            var receipts = items.blockingReceipts;
+            if (typeof receipts === "undefined")
+                receipts = {};
+            for (var idx in queuedStorage) {
+                if (!(idx in receipts)) {
+                    receipts[idx] = queuedStorage[idx];
+                }
             }
-        }
-        queuedStorage = {};
+            setLocal({blockingReceipts: receipts},function() {
+                queuedStorage = {};
+            });
+        });
     }
     else {
         chrome.storage.local.get("blockingReceipts",function(items) {
@@ -137,14 +186,15 @@ function saveBlockingReceipts() {
 }
 function getProtectedUsers(callback) {
     if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
-        var ss = require("sdk/simple-storage");
-        if (typeof ss.storage.protectedUsers === "undefined") {
-            ss.storage.protectedUsers = {};
-        }
-        callback(ss.storage.protectedUsers);
+        getSync("protectedUsers",function(items) {
+            var users = items.protectedUsers;
+            if (typeof users === "undefined")
+                users = {};
+            callback(users);
+        });
     }
     else {
-        chrome.storage.local.get("protectedUsers",function(items) {
+        chrome.storage.sync.get("protectedUsers",function(items) {
             var users = items.protectedUsers;
             if (typeof users === "undefined")
                 users = {};
@@ -190,32 +240,32 @@ function addUsersToBlockQueue() {
 function showDialog() {
     $("body").append(
 '<div id="blockchain-dialog" class="modal-container block-or-report-dialog block-selected report-user">'+
-	'<div class="close-modal-background-target"></div>'+
-	'<div class="modal modal-medium draggable" id="block-or-report-dialog-dialog" role="dialog" aria-labelledby="block-or-report-dialog-header" style="top: 240px; left: 470px;"><div class="js-first-tabstop" tabindex="0"></div>'+
-	'<div class="modal-content" role="document">'+
-		'<div class="modal-header">'+
-			'<h3 class="modal-title report-title" id="blockchain-dialog-header">Twitter Block Chain</h3>'+
-		'</div>'+
-		'<div class="report-form">'+
+    '<div class="close-modal-background-target"></div>'+
+    '<div class="modal modal-medium draggable" id="block-or-report-dialog-dialog" role="dialog" aria-labelledby="block-or-report-dialog-header" style="top: 240px; left: 470px;"><div class="js-first-tabstop" tabindex="0"></div>'+
+    '<div class="modal-content" role="document">'+
+        '<div class="modal-header">'+
+            '<h3 class="modal-title report-title" id="blockchain-dialog-header">Twitter Block Chain</h3>'+
+        '</div>'+
+        '<div class="report-form">'+
             '<p>Found: <span class="usersFound"></span></p>'+
             '<p>Skipped: <span class="usersSkipped"></span></p>'+
             '<p>Already Blocked: <span class="usersAlreadyBlocked"></span></p>'+
             '<p>Blocked: <span class="usersBlocked"></span></p>'+
             '<p>Total: <span class="totalCount"></span></p>'+
             '<p>Errors: <span class="errorCount"></span></p>'+
-		'</div>'+
-		'<div id="report-control" class="modal-body submit-section">'+
-			'<div class="clearfix">'+
-				'<button id="done" class="btn primary-btn report-tweet-next-button" type="button">Done</button>'+
-			'</div>'+
-		'</div>'+
-	'</div>'+
-	'<button type="button" class="modal-btn modal-close js-close" aria-controls="block-or-report-dialog-dialog">'+
-		'<span class="Icon Icon--close Icon--medium">'+
-			'<span class="visuallyhidden">Close</span>'+
-		'</span>'+
-	'</button>'+
-	'<div class="js-last-tabstop" tabindex="0"></div>'+
+        '</div>'+
+        '<div id="report-control" class="modal-body submit-section">'+
+            '<div class="clearfix">'+
+                '<button id="done" class="btn primary-btn report-tweet-next-button" type="button">Done</button>'+
+            '</div>'+
+        '</div>'+
+    '</div>'+
+    '<button type="button" class="modal-btn modal-close js-close" aria-controls="block-or-report-dialog-dialog">'+
+        '<span class="Icon Icon--close Icon--medium">'+
+            '<span class="visuallyhidden">Close</span>'+
+        '</span>'+
+    '</button>'+
+    '<div class="js-last-tabstop" tabindex="0"></div>'+
 '</div>'
     );
     $("#blockchain-dialog").show().find("button").click(function() {
