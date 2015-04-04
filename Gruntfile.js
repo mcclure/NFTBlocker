@@ -46,6 +46,17 @@ module.exports = function(grunt) {
                 }
             }*/
         },
+        copy: {
+            main: {
+                files: [
+                    // includes files within path
+                    {expand: true, src: ['js/*'], dest: 'firefox/data/', filter: 'isFile'},
+                    {expand: true, src: ['*.html'], dest: 'firefox/data/', filter: 'isFile'},
+                    // includes files within path and its sub-directories
+                    {expand: true, src: ['bower_components/**'], dest: 'firefox/data/'}
+                ],
+            },
+        },
         compress: {
             main: {
                 options: {
@@ -74,11 +85,11 @@ module.exports = function(grunt) {
         }
     });
 
-    // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
 
     // Default task(s).
     grunt.registerTask('default', ['compress']);
-    grunt.registerTask('test-firefox', ['mozilla-cfx']);
+    grunt.registerTask('test-firefox', ['copy','mozilla-cfx']);
 };

@@ -103,7 +103,7 @@ function findWorkerForCurrentTab(){
 
 pageMod.PageMod({
     include: "*.twitter.com",
-    contentScriptFile: [data.url("jquery.min.js"),data.url("Queue.js"),data.url("blockchain.js")],
+    contentScriptFile: [data.url("bower_components/dist/jquery.min.js"),data.url("js/Queue.js"),data.url("js/blockchain.js")],
     onAttach: function(worker) {
         array.add(workers, this);
         worker.on('detach', function () { array.remove(workers, this); });
