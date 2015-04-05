@@ -19,53 +19,8 @@ function($routeProvider) {
     });
 }]);
 optionsApp.factory('StorageService', function() {
-    var ret = {};
-    if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
-        var savedCallback;
-        var savedKey;
-        self.port.on("getResult",function(data) {
-            var ret = {};
-            if (data !== null)
-                ret[savedKey] = data;
-            savedCallback(ret);
-        });
-        self.port.on("setResult",function(result) {
-            savedCallback();
-        });
-        ret.getLocal = function (key, callback) {
-            savedCallback = callback;
-            savedKey = key;
-            self.port.emit("get",key);
-        }
-        ret.setLocal = function (data, callback) {
-            savedCallback = callback;
-            self.port.emit("set", data);
-        }
-        ret.getSync = function (key, callback) {
-            savedCallback = callback;
-            savedKey = key;
-            self.port.emit("get",key);
-        }
-        ret.setSync = function (data, callback) {
-            savedCallback = callback;
-            self.port.emit("set", data);
-        }
-    }
-    else {
-        ret.getLocal = function (key, callback) {
-            chrome.storage.local.get(key,callback);
-        }
-        ret.setLocal = function (data, callback) {
-            chrome.storage.local.set(data,callback);
-        }
-        ret.getSync = function (key, callback) {
-            chrome.storage.sync.get(key,callback);
-        }
-        ret.setSync = function (data, callback) {
-            chrome.storage.sync.set(data,callback);
-        }
-    }
-    return ret;
+    var storage = new ExtensionStorage();
+    return storage;
 });
 
 optionsApp.controller('ReceiptsController', ['StorageService', '$scope', function(StorageService, $scope) {

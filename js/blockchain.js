@@ -14,28 +14,7 @@ var connectionType = "following";
 var queuedStorage = {};
 var protectedUsers = {};
 
-// firefox storage
-var savedCallback;
-var savedKey;
-function getLocal(key, callback) {
-    savedCallback = callback;
-    savedKey = key;
-    self.port.emit("get", key);
-}
-function setLocal(data, callback) {
-    savedCallback = callback;
-    self.port.emit("set", data);
-}
-function getSync(key, callback) {
-    savedCallback = callback;
-    savedKey = key;
-    self.port.emit("get", key);
-}
-function setSync(data, callback) {
-    savedCallback = callback;
-    self.port.emit("set", data);
-}
-
+var storage = new ExtensionStorage();
 
 if (typeof chrome !== "undefined") {
     chrome.runtime.onMessage.addListener(
@@ -60,16 +39,6 @@ else {
             else {
                 self.port.emit("error",'Navigate to a twitter following or followers page.');
             }
-    });
-    // firefox storage
-    self.port.on("getResult",function(data) {
-        var ret = {};
-        if (data !== null)
-            ret[savedKey] = data;
-        savedCallback(ret);
-    });
-    self.port.on("setResult",function(result) {
-        savedCallback();
     });
 }
 $("#blockAllUsers").click(startBlockChain);
@@ -153,54 +122,27 @@ function saveBlockingReceipts() {
     if (Object.keys(queuedStorage).length <= 0)
         return;
     
-    if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
-        getLocal("blockingReceipts", function(items) {
-            var receipts = items.blockingReceipts;
-            if (typeof receipts === "undefined")
-                receipts = {};
-            for (var idx in queuedStorage) {
-                if (!(idx in receipts)) {
-                    receipts[idx] = queuedStorage[idx];
-                }
+    storage.getLocal("blockingReceipts", function(items) {
+        var receipts = items.blockingReceipts;
+        if (typeof receipts === "undefined")
+            receipts = {};
+        for (var idx in queuedStorage) {
+            if (!(idx in receipts)) {
+                receipts[idx] = queuedStorage[idx];
             }
-            setLocal({blockingReceipts: receipts},function() {
-                queuedStorage = {};
-            });
+        }
+        storage.setLocal({blockingReceipts: receipts},function() {
+            queuedStorage = {};
         });
-    }
-    else {
-        chrome.storage.local.get("blockingReceipts",function(items) {
-            var receipts = items.blockingReceipts;
-            if (typeof receipts === "undefined")
-                receipts = {};
-            for (var idx in queuedStorage) {
-                if (!(idx in receipts)) {
-                    receipts[idx] = queuedStorage[idx];
-                }
-            }
-            chrome.storage.local.set({blockingReceipts: receipts},function() {
-                queuedStorage = {};
-            });
-        });
-    }
+    });
 }
 function getProtectedUsers(callback) {
-    if (typeof chrome === "undefined" || typeof chrome.storage === "undefined") {
-        getSync("protectedUsers",function(items) {
-            var users = items.protectedUsers;
-            if (typeof users === "undefined")
-                users = {};
-            callback(users);
-        });
-    }
-    else {
-        chrome.storage.sync.get("protectedUsers",function(items) {
-            var users = items.protectedUsers;
-            if (typeof users === "undefined")
-                users = {};
-            callback(users);
-        });
-    }
+    storage.getSync("protectedUsers",function(items) {
+        var users = items.protectedUsers;
+        if (typeof users === "undefined")
+            users = {};
+        callback(users);
+    });
 }
 function startBlockChain() {
     var result = confirm("Are you sure you want to block all users on this page that you aren't following?");

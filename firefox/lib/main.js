@@ -48,6 +48,7 @@ contextPanel.port.on("click",function(option) {
                         data.url('bower_components/angular/angular.js'),
                         data.url('bower_components/angular-route/angular-route.min.js'),
                         data.url('bower_components/angular-datatables/dist/angular-datatables.min.js'),
+                        data.url('js/ExtensionStorage.js'),
                         data.url('js/options.js')
                     ]
                 });
@@ -103,7 +104,7 @@ function findWorkerForCurrentTab(){
 
 pageMod.PageMod({
     include: "*.twitter.com",
-    contentScriptFile: [data.url("bower_components/dist/jquery.min.js"),data.url("js/Queue.js"),data.url("js/blockchain.js")],
+    contentScriptFile: [data.url("bower_components/dist/jquery.min.js"),data.url("js/Queue.js"),data.url("js/ExtensionStorage.js"),data.url("js/blockchain.js")],
     onAttach: function(worker) {
         array.add(workers, this);
         worker.on('detach', function () { array.remove(workers, this); });
