@@ -4,5 +4,5 @@ node_modules
 build_tools
 firefox/data/bower_components
 firefox/data/js
-firefox/data/options.html
+firefox/data/css
 firefox/data/partial*

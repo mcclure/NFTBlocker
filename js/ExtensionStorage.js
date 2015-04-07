@@ -1,27 +1,28 @@
-var ExtensionStorage.prototype = function() {
+function ExtensionStorage() {
+    var es = this;
     this.savedCallback = null;
     this.savedKey = null;
     // firefox storage
-    if (typeof chrome !== "undefined") {
+    if (typeof chrome === "undefined") {
         this.getLocal = function(key, callback) {
-            this.savedCallback = callback;
-            this.savedKey = key;
+            es.savedCallback = callback;
+            es.savedKey = key;
             self.port.emit("get", key);
         }
         this.getSync = this.getLocal;
         this.setLocal = function(data, callback) {
-            this.savedCallback = callback;
+            es.savedCallback = callback;
             self.port.emit("set", data);
         }
         this.setSync = this.setLocal;
         self.port.on("getResult",function(data) {
             var ret = {};
             if (data !== null)
-                ret[savedKey] = data;
-            this.savedCallback(ret);
+                ret[es.savedKey] = data;
+            es.savedCallback(ret);
         });
         self.port.on("setResult",function(result) {
-            this.savedCallback();
+            es.savedCallback();
         });
     }
     // chrome storage

@@ -51,7 +51,8 @@ module.exports = function(grunt) {
                 files: [
                     // includes files within path
                     {expand: true, src: ['js/*'], dest: 'firefox/data/', filter: 'isFile'},
-                    {expand: true, src: ['*.html'], dest: 'firefox/data/', filter: 'isFile'},
+                    {expand: true, src: ['css/*'], dest: 'firefox/data/', filter: 'isFile'},
+                    {expand: true, src: ['partial_*.html'], dest: 'firefox/data/', filter: 'isFile'},
                     // includes files within path and its sub-directories
                     {expand: true, src: ['bower_components/**'], dest: 'firefox/data/'}
                 ],
@@ -66,7 +67,7 @@ module.exports = function(grunt) {
                     {src: 'js/*', dest: 'js/'},
                     {src: 'css/*', dest: 'css/'},
                     {src: 'images/*', dest: 'images/'},
-                    {src: 'partial_*.html', dest: ''},
+                    {src: '*.html', dest: ''},
                     {src: '*.json', dest: ''},
                     {src: 'manifest.json', dest: ''},
                     {src: 'LICENSE', dest: ''},
