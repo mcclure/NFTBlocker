@@ -52,10 +52,18 @@ module.exports = function(grunt) {
                     // includes files within path
                     {expand: true, src: ['js/*'], dest: 'firefox/data/', filter: 'isFile'},
                     {expand: true, src: ['css/*'], dest: 'firefox/data/', filter: 'isFile'},
+                    {src: 'options.html', dest: 'firefox/data/options.html'},
                     {expand: true, src: ['partial_*.html'], dest: 'firefox/data/', filter: 'isFile'},
                     // includes files within path and its sub-directories
                     {expand: true, src: ['bower_components/**'], dest: 'firefox/data/'}
                 ],
+                options: {
+                    process: function (content, srcpath) {
+                        if (srcpath=="options.html")
+                            return content.replace(/[\t ]*<script.*script>\r?\n?/g,"");
+                        return content;
+                    }
+                }
             },
         },
         compress: {
