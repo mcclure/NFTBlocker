@@ -104,6 +104,7 @@ function findWorkerForCurrentTab(){
 
 pageMod.PageMod({
     include: "*.twitter.com",
+    contentStyleFile: data.url("css/content.css"),
     contentScriptFile: [data.url("bower_components/dist/jquery.min.js"),data.url("js/Queue.js"),data.url("js/ExtensionStorage.js"),data.url("js/blockchain.js")],
     onAttach: function(worker) {
         array.add(workers, this);

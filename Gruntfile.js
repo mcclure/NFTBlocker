@@ -66,7 +66,7 @@ module.exports = function(grunt) {
                     {src: 'js/*', dest: 'js/'},
                     {src: 'css/*', dest: 'css/'},
                     {src: 'images/*', dest: 'images/'},
-                    {src: '*.html', dest: ''},
+                    {src: 'partial_*.html', dest: ''},
                     {src: '*.json', dest: ''},
                     {src: 'manifest.json', dest: ''},
                     {src: 'LICENSE', dest: ''},
