@@ -41,7 +41,7 @@ else {
             }
     });
 }
-$("#blockAllUsers").click(startBlockChain);
+
 function getProfileUsername() {
     return $(".ProfileSidebar .ProfileHeaderCard .ProfileHeaderCard-screenname a span").text();
 }
