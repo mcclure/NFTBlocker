@@ -27,9 +27,9 @@ function ExtensionStorage() {
     }
     // chrome storage
     else {
-        this.getLocal = chrome.storage.local.get;
-        this.setLocal = chrome.storage.local.set;
-        this.setSync = chrome.storage.sync.set;
-        this.getSync = chrome.storage.sync.get;
+        this.getLocal = function (key, callback) { chrome.storage.local.get(key, callback) };
+        this.setLocal = function (data, callback) { chrome.storage.local.set(data, callback) };
+        this.getSync = function (key, callback) { chrome.storage.sync.get(key, callback) };
+        this.setSync = function (data, callback) { chrome.storage.sync.set(data, callback) };;
     }
 }

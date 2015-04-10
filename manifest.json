@@ -13,6 +13,7 @@
     "default_icon": "images/icon.png",
     "default_popup": "popup.html"
   },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
     "storage",
     "activeTab",
@@ -23,7 +24,7 @@
     {
       "matches": ["https://www.twitter.com/*","https://twitter.com/*"],
       "css": ["css/content.css"],
-      "js": ["js/Queue.js","bower_components/jquery/dist/jquery.min.js","js/blockchain.js"]
+      "js": ["js/Queue.js","js/ExtensionStorage.js","bower_components/jquery/dist/jquery.min.js","js/blockchain.js"]
     }
   ]
 }
