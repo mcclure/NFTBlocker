@@ -9,6 +9,8 @@ var self = require("sdk/self");
 var ss = require("sdk/simple-storage");
 
 var popup = require("sdk/panel").Panel({
+    width: 420,
+    height: 40,
     contentURL: data.url("popup.html"),
     contentScriptFile: data.url("popup.js")
 });
@@ -18,6 +20,7 @@ popup.on('click', function() {
 });
 
 var contextPanel = require("sdk/panel").Panel({
+    height:120,
     contentURL: data.url("contextmenu.html"),
     contentScriptFile: data.url("contextmenu.js"),
     onHide: handleHide
@@ -34,7 +37,9 @@ contextPanel.port.on("click",function(option) {
             worker.port.emit("blockChainStart", true);
         }
         else {
-            popup.show();
+            popup.show({
+                position: button
+            });
         }
     }
     else {
