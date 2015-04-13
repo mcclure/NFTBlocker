@@ -3,9 +3,9 @@
 
   "name": "Twitter Block Chain",
   "description": "Blocks all users on a following/followers page.",
-  "version": "1.4",
+  "version": "1.5",
   "icons": { 
-  "16": "images/icon16.png",
+    "16": "images/icon16.png",
     "48": "images/icon48.png",
     "128": "images/icon128.png" 
   },

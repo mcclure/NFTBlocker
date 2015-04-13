@@ -26,8 +26,14 @@ module.exports = function(grunt) {
                     {src: 'options.html', dest: 'firefox/data/options.html'},
                     {src: 'package.json', dest: 'firefox/package.json'},
                     {expand: true, src: ['partial_*.html'], dest: 'firefox/data/', filter: 'isFile'},
-                    // includes files within path and its sub-directories
-                    {expand: true, src: ['bower_components/**'], dest: 'firefox/data/'}
+                    {src: 'bower_components/angular/angular.min.js', dest: 'firefox/data/'},
+                    {src: 'bower_components/angular-route/angular-route.min.js', dest: 'firefox/data/'},
+                    {src: 'bower_components/bootstrap/dist/css/bootstrap.min.css', dest: 'firefox/data/'},
+                    {src: 'bower_components/jquery/dist/jquery.min.js', dest: 'firefox/data/'},
+                    {src: 'bower_components/angular-datatables/dist/angular-datatables.min.js', dest: 'firefox/data/'},
+                    {src: 'bower_components/datatables/media/js/jquery.dataTables.min.js', dest: 'firefox/data/'},
+                    {src: 'bower_components/datatables/media/css/jquery.dataTables.min.css', dest: 'firefox/data/'},
+                    {src: 'bower_components/datatables/media/images/*', dest: 'firefox/data/'},
                 ],
                 options: {
                     process: function (content, srcpath) {
@@ -44,23 +50,22 @@ module.exports = function(grunt) {
                     archive: 'blockchain.zip'
                 },
                 files: [
-                    {src: 'js/*', dest: 'js/'},
-                    {src: 'css/*', dest: 'css/'},
-                    {src: 'images/*', dest: 'images/'},
+                    {src: 'js/*', dest: ''},
+                    {src: 'css/*', dest: ''},
+                    {src: 'images/*', dest: ''},
                     {src: '*.html', dest: ''},
                     {src: '*.json', dest: ''},
-                    {src: 'manifest.json', dest: ''},
                     {src: 'LICENSE', dest: ''},
                     {src: 'CONTRIBUTORS', dest: ''},
                     {src: 'README.md', dest: ''},
-                    {src: 'bower_components/angular/angular.min.js', dest: 'bower_components/angular/'},
-                    {src: 'bower_components/angular-route/angular-route.min.js', dest: 'bower_components/angular-route/'},
-                    {src: 'bower_components/bootstrap/dist/css/bootstrap.min.js', dest: 'bower_components/bootstrap/dist/css/'},
-                    {src: 'bower_components/jquery/dist/jquery.min.js', dest: 'bower_components/jquery/dist/'},
-                    {src: 'bower_components/angular-datatables/dist/angular-datatables.min.js', dest: 'bower_components/angular-datatables/dist/'},
-                    {src: 'bower_components/datatables/media/js/jquery.dataTables.min.js', dest: 'bower_components/datatables/media/js/'},
-                    {src: 'bower_components/datatables/media/css/jquery.dataTables.min.css', dest: 'bower_components/datatables/media/css/'},
-                    {src: 'bower_components/datatables/media/images/*', dest: 'bower_components/datatables/media/images/'},
+                    {src: 'bower_components/angular/angular.min.js', dest: ''},
+                    {src: 'bower_components/angular-route/angular-route.min.js', dest: ''},
+                    {src: 'bower_components/bootstrap/dist/css/bootstrap.min.css', dest: ''},
+                    {src: 'bower_components/jquery/dist/jquery.min.js', dest: ''},
+                    {src: 'bower_components/angular-datatables/dist/angular-datatables.min.js', dest: ''},
+                    {src: 'bower_components/datatables/media/js/jquery.dataTables.min.js', dest: ''},
+                    {src: 'bower_components/datatables/media/css/jquery.dataTables.min.css', dest: ''},
+                    {src: 'bower_components/datatables/media/images/*', dest: ''},
                 ]
             }
         }
@@ -74,4 +79,5 @@ module.exports = function(grunt) {
     grunt.registerTask('default', ['compress']);
     grunt.registerTask('test-firefox', ['copy','jpm:run']);
     grunt.registerTask('build-firefox', ['copy','jpm:xpi']);
+    grunt.registerTask('build-chrome', ['compress:main']);
 };

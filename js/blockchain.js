@@ -151,6 +151,7 @@ function startBlockChain() {
     currentProfileName = getProfileUsername();
     showDialog();
     getProtectedUsers(function(items) {
+        protectedUsers = items;
         startAccountFinder();
         startBlocker();
     });
