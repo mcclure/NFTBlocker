@@ -68,16 +68,20 @@ module.exports = function(grunt) {
                     {src: 'bower_components/datatables/media/images/*', dest: ''},
                 ]
             }
+        },
+        curl: {
+          'firefox/data/bower_components/jquery/dist/jquery.min.js': 'http://code.jquery.com/jquery-2.1.3.min.js',
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-jpm');
+    grunt.loadNpmTasks('grunt-curl');
 
     // Default task(s).
     grunt.registerTask('default', ['compress']);
     grunt.registerTask('test-firefox', ['copy','jpm:run']);
-    grunt.registerTask('build-firefox', ['copy','jpm:xpi']);
+    grunt.registerTask('build-firefox', ['copy','curl','jpm:xpi']);
     grunt.registerTask('build-chrome', ['compress:main']);
 };
