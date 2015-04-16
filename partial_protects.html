@@ -8,7 +8,7 @@
 		</tr>
 		</thead>
 		<tbody>
-		<tr ng-repeat="user in protectedUsers">
+		<tr ng-repeat="user in ::protectedUsers">
 			<td>{{ user.username }}</td>
 			<td>{{ user.on | date:'medium' }}</td>
 			<td><a ng-click="deleteProtection(user)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete</a></td>

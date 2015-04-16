@@ -43,13 +43,12 @@ optionsApp.controller('ProtectedController', ['StorageService', '$scope', functi
     $scope.should.refreshTable = false;
     
     StorageService.getSync("protectedUsers",function(items) {
-        var dataset=[];
+        $scope.protectedUsers=[];
         for(var username in items.protectedUsers) {
-            var receipt = items.protectedUsers[username];
-            dataset.push( receipt );
+            $scope.protectedUsers.push(items.protectedUsers[username]);
         }
-        $scope.protectedUsers = dataset;
         $scope.should.refreshTable = true;
+        $scope.$apply();
     });
     $scope.deleteProtection = function(user) {
         var response = confirm("Are you sure you want to remove "+user.username+" from the protected users list?");

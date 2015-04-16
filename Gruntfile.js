@@ -14,7 +14,16 @@ module.exports = function(grunt) {
         jpm: {
             options: {
                 src: "./firefox/",
-                xpi: "./tmp/"
+                xpi: "./tmp/gte38/"
+            }
+        },
+        "mozilla-cfx-xpi": {
+            'stable': {
+                options: {
+                    "mozilla-addon-sdk": "latest",
+                    extension_dir: "firefox",
+                    dist_dir: "tmp/lte37/"
+                }
             }
         },
         copy: {
@@ -23,6 +32,7 @@ module.exports = function(grunt) {
                     // includes files within path
                     {expand: true, src: ['js/*'], dest: 'firefox/data/', filter: 'isFile'},
                     {expand: true, src: ['css/*'], dest: 'firefox/data/', filter: 'isFile'},
+                    {expand: true, src: ['bower_components/bootstrap/dist/fonts/*'], dest: 'firefox/data/', filter: 'isFile'},
                     {src: 'options.html', dest: 'firefox/data/options.html'},
                     {src: 'package.json', dest: 'firefox/package.json'},
                     {expand: true, src: ['partial_*.html'], dest: 'firefox/data/', filter: 'isFile'},
@@ -71,17 +81,20 @@ module.exports = function(grunt) {
         },
         curl: {
           'firefox/data/bower_components/jquery/dist/jquery.min.js': 'http://code.jquery.com/jquery-2.1.3.min.js',
+          'firefox/data/bower_components/angular/angular.min.js': 'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js',
+          'firefox/data/bower_components/angular-route/angular-route.min.js': 'https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.min.js',
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-jpm');
+    grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
     grunt.loadNpmTasks('grunt-curl');
 
     // Default task(s).
     grunt.registerTask('default', ['compress']);
     grunt.registerTask('test-firefox', ['copy','jpm:run']);
-    grunt.registerTask('build-firefox', ['copy','curl','jpm:xpi']);
+    grunt.registerTask('build-firefox', ['copy','curl','jpm:xpi','mozilla-cfx-xpi:stable']);
     grunt.registerTask('build-chrome', ['compress:main']);
 };

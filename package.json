@@ -15,6 +15,7 @@
     "grunt-contrib-compress": "^0.13.0",
     "grunt-contrib-copy": "^0.8.0",
     "grunt-jpm": "^0.1.0",
-    "grunt-curl": "~2.2.0"
+    "grunt-curl": "~2.2.0",
+    "grunt-mozilla-addon-sdk": "^0.4.0"
   }
 }
