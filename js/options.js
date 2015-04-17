@@ -61,6 +61,7 @@ optionsApp.controller('ProtectedController', ['StorageService', '$scope', functi
             delete items.protectedUsers[user.username];
             StorageService.setSync({ protectedUsers: items.protectedUsers }, function() {
                 $scope.protectedUsers = items.protectedUsers;
+                $scope.should.refreshTable = true;
                 $scope.$apply();
             });
         });

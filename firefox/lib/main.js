@@ -49,10 +49,10 @@ contextPanel.port.on("click",function(option) {
                 var worker = tab.attach({
                     contentScriptFile: [
                         data.url('bower_components/jquery/dist/jquery.min.js'),
-                        data.url('bower_components/datatables/media/js/jquery.dataTables.min.js'),
+                        data.url('bower_components/datatables/media/js/jquery.dataTables.js'),
                         data.url('bower_components/angular/angular.min.js'),
                         data.url('bower_components/angular-route/angular-route.min.js'),
-                        data.url('bower_components/angular-datatables/dist/angular-datatables.min.js'),
+                        data.url('bower_components/angular-datatables/dist/angular-datatables.js'),
                         data.url('js/ExtensionStorage.js'),
                         data.url('js/options.js')
                     ]
