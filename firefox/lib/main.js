@@ -11,8 +11,7 @@ var ss = require("sdk/simple-storage");
 var popup = require("sdk/panel").Panel({
     width: 420,
     height: 40,
-    contentURL: data.url("popup.html"),
-    contentScriptFile: data.url("popup.js")
+    contentURL: data.url("popup.html")
 });
 
 popup.on('click', function() {
