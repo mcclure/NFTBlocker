@@ -1,15 +1,20 @@
 # Twitter Block Chain
 
-This chrome extension helps users who have been retweeted and are likely to be,
-or currently being dog-piled.
+This browser extension helps users who are likely to be, or currently are being dog-piled.
 By navigating to a user's followers (or following) page and activating the 
 plugin, you can block all users on that page.
+
+# Build Instructions
+
+* Building requires `grunt` and `grunt-cli`
+* Chrome: `grunt build-chrome`
+* Firefox: `grunt build-firefox`
 
 # FAQs 
 
 I'm trying to use this as an unpacked extension and it isn't working?
 
-You'll need to include jquery-1.11.2.min.js in the project folder.
+Run `bower install` first to pull down the dependencies.
 
 How do I activate the plugin?
 
@@ -31,5 +36,4 @@ locally, and not synced to the cloud.
 # To Do / Possible Features
 
 * Output a JSON object of users from a page, to later feed into the extension.
-* Whitelist 
 * Option to mute users instead of blocking them.
