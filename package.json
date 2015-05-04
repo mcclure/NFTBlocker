@@ -4,7 +4,7 @@
   "id": "twitterblockchain@satsuki.tv",
   "description": "A twitter blocking tool to block everyone who follows or is followed by a user.",
   "repository": "satsukitv/twitter-block-chain",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "main": "lib/main.js",
   "icon": "data/icon32.png",
   "icon64": "data/icon64.png",
