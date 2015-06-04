@@ -13,6 +13,7 @@ var currentProfileName = "";
 var connectionType = "following";
 var queuedStorage = {};
 var protectedUsers = {};
+var usersSeenThisRun = {};
 
 var storage = new ExtensionStorage();
 
@@ -56,7 +57,7 @@ function startAccountFinder(callback) {
     }
     scrollerInterval = setInterval(function() {
         window.scroll(0, $(document).height());
-        if ($(".GridTimeline-end.has-more-items").length==0) {
+        if ($(".GridTimeline-end.has-more-items").length==0 || scrollerCompleted) {
             clearInterval(scrollerInterval);
             scrollerInterval = false;
             addUsersToBlockQueue();
@@ -69,7 +70,7 @@ function startAccountFinder(callback) {
     },500);
     finderInterval = setInterval(function() {
         addUsersToBlockQueue();
-        if (usersFound==totalCount && totalCount > 0) {
+        if ((usersFound==totalCount && totalCount > 0) || finderCompleted) {
             clearInterval(finderInterval);
             finderInterval = false;
             finderCompleted = true;
@@ -152,6 +153,7 @@ function startBlockChain() {
     showDialog();
     getProtectedUsers(function(items) {
         protectedUsers = items;
+        usersSeenThisRun = {};
         startAccountFinder();
         startBlocker();
     });
@@ -161,6 +163,15 @@ function addUsersToBlockQueue() {
     $(".ProfileCard:not(.blockchain-added)").each(function(i,e) {
         $(e).addClass("blockchain-added");
         var username = $(e).data('screen-name');
+        // check if we've blocked this username already. if so, we've looped through
+        if (username in usersSeenThisRun) {
+            scrollerCompleted = true;
+            finderCompleted = true;
+            return true;
+        }
+        else {
+            usersSeenThisRun[username] = true;
+        }
         if ($(e).find('.user-actions.following').length > 0 || username in protectedUsers) {
             usersSkipped++;
             $("#blockchain-dialog .usersSkipped").text(usersSkipped);
