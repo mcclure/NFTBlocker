@@ -52,6 +52,7 @@ function renderStatus(statusText) {
 document.addEventListener('DOMContentLoaded', function() {
   getCurrentTabUrl(function(url) {
     console.log(url);
+    chrome.storage.local.set({removeImageBlock: Math.random()});
     if (url.match(/^https\:\/\/twitter\.com/)) {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             chrome.tabs.sendMessage(tabs[0].id, {blockChainStart: true}, function(response) {
@@ -59,6 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (typeof response !== "undefined" && typeof response.error !== "undefined")
                     renderStatus(response.error_description);
             });
+            // piggybacking on chrome's storage class to send an event to our background page.
+            chrome.storage.local.set({addImageBlock: Math.random(), tabId: tabs[0].id});
         });
     }
     else {
@@ -67,3 +70,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+

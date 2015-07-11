@@ -17,6 +17,9 @@
   "permissions": [
     "storage",
     "activeTab",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*.twimg.com/",
     "https://twitter.com/"
   ],
   "options_page": "options.html",
@@ -26,5 +29,8 @@
       "css": ["css/content.css"],
       "js": ["js/Queue.js","js/ExtensionStorage.js","bower_components/jquery/dist/jquery.min.js","js/blockchain.js"]
     }
-  ]
+  ],
+  "background": {
+    "scripts": ["js/background.js"]
+  }
 }

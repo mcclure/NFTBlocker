@@ -240,5 +240,9 @@ function showDialog() {
         $("#blockchain-dialog .totalCount").text(totalCount);
         $("#blockchain-dialog .errorCount").text(errors);
         $("#blockchain-dialog").hide();
+        // piggybacking on chrome's storage class to send an event to our background page.
+        if (typeof chrome !== "undefined") {
+            chrome.storage.local.set({removeImageBlock: Math.random()});
+        }
     });
 }
