@@ -44,25 +44,35 @@ function getCurrentTabUrl(callback) {
 }
 
 
-
+function showOptions() {
+  document.getElementById('options').style.display = 'block';
+  document.getElementById('status').style.display = 'none';
+}
 function renderStatus(statusText) {
   document.getElementById('status').textContent = statusText;
+  document.getElementById('options').style.display = 'none';
+  document.getElementById('status').style.display = 'block';
 }
-
+function runBlockchain(type) {
+  chrome.storage.local.set({removeImageBlock: Math.random()});
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {blockChainStart: type}, function(response) {
+          console.log(response);
+          if (typeof response !== "undefined" && typeof response.error !== "undefined")
+              renderStatus(response.error_description);
+      });
+      // piggybacking on chrome's storage class to send an event to our background page.
+      chrome.storage.local.set({addImageBlock: Math.random(), tabId: tabs[0].id});
+  });
+}
 document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('runBlockchain').addEventListener("click", function() { runBlockchain('block'); } );
+  document.getElementById('runExportchain').addEventListener("click", function() { runBlockchain('export'); });
+  document.getElementById('runImportchain').addEventListener("click", function() { runBlockchain('import'); });
   getCurrentTabUrl(function(url) {
-    console.log(url);
     chrome.storage.local.set({removeImageBlock: Math.random()});
     if (url.match(/^https\:\/\/twitter\.com/)) {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {blockChainStart: true}, function(response) {
-                console.log(response);
-                if (typeof response !== "undefined" && typeof response.error !== "undefined")
-                    renderStatus(response.error_description);
-            });
-            // piggybacking on chrome's storage class to send an event to our background page.
-            chrome.storage.local.set({addImageBlock: Math.random(), tabId: tabs[0].id});
-        });
+        showOptions();
     }
     else {
         // Put the image URL in Google search.

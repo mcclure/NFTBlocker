@@ -9,14 +9,23 @@
       }
       #status {
         max-width: 600px;
-		min-width: 400px;
+        min-width: 400px;
+        padding:15px;
+      }
+      button {
+        width:100%;
       }
     </style>
-	
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <script src="js/popup.js"></script>
   </head>
   <body>
-    <div id="status">Navigate to a following or followers page on Twitter.</div>
+    <div id="options">
+      <button class="btn btn-primary" id="runBlockchain">Run Blockchain</button>
+      <button class="btn btn-primary" id="runExportchain">Run Exportchain</button>
+      <button class="btn btn-primary" id="runImportchain">Run Importchain</button>
+    </div>
+    <h4 id="status">Navigate to a following or followers page on Twitter.</h4>
   </body>
 </html>
 

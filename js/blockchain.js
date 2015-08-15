@@ -14,16 +14,27 @@ var connectionType = "following";
 var queuedStorage = {};
 var protectedUsers = {};
 var usersSeenThisRun = {};
+var countUsersSeenThisRun = true;
+var userExport = {};
+var mode = 'block'; // [block, export, import];
 
 var storage = new ExtensionStorage();
 
 if (typeof chrome !== "undefined") {
     chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-        if (request.blockChainStart) {
-            if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0) {
+        if (typeof request.blockChainStart !== "undefined") {
+            if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0 || request.blockChainStart == 'import') {
                 sendResponse({ack: true});
-                startBlockChain();
+                if (request.blockChainStart == 'block') {
+                    startBlockChain();    
+                }
+                else if (request.blockChainStart == 'export') {
+                    startExportChain();
+                }
+                else if (request.blockChainStart == 'import') {
+                    startImportChain();
+                }
             }
             else {
                 sendResponse({error: true, error_description: 'Navigate to a twitter following or followers page.'});
@@ -33,7 +44,7 @@ if (typeof chrome !== "undefined") {
 }
 else {
     self.port.on("blockChainStart", function(message) {
-        if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0) {
+        if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0 && message.mode != 'import') {
                 self.port.emit("ack",true);
                 startBlockChain();
             }
@@ -49,6 +60,7 @@ function getProfileUsername() {
 function startAccountFinder(callback) {
     var finderCompleted = false;
     var scrollerCompleted = false;
+    countUsersSeenThisRun = true;
     if ($(".ProfileNav-item.ProfileNav--item--following.is-active").length==1) {
         connectionType = "followed by";
     }
@@ -56,20 +68,30 @@ function startAccountFinder(callback) {
         connectionType = "following";
     }
     scrollerInterval = setInterval(function() {
+        // megadom
+        if ($(".GridTimeline-items .Grid.Grid--withGutter").length>50) {
+            $(".GridTimeline-items .Grid.Grid--withGutter").slice(0,25).remove();
+            window.scroll(0, 0);
+            return;
+        }
+        // find DOM to eat
+        if ($(".ProfileCard.blockchain-added").length > 100) {
+            $(".ProfileCard.blockchain-added").empty().css({height: '281px'});
+            window.scroll(0, $(document).height()-500);
+        }
         window.scroll(0, $(document).height());
         if ($(".GridTimeline-end.has-more-items").length==0 || scrollerCompleted) {
             clearInterval(scrollerInterval);
             scrollerInterval = false;
-            addUsersToBlockQueue();
-            totalCount = $(".ProfileCard").length;
-            $("#blockchain-dialog .totalCount").text(totalCount);
             scrollerCompleted = true;
-            if (finderCompleted && scrollerCompleted && callback)
-                callback();
         }
     },500);
     finderInterval = setInterval(function() {
         addUsersToBlockQueue();
+        if (scrollerCompleted) {
+            totalCount = usersFound;
+            $("#blockchain-dialog .totalCount").text(totalCount);
+        }
         if ((usersFound==totalCount && totalCount > 0) || finderCompleted) {
             clearInterval(finderInterval);
             finderInterval = false;
@@ -86,8 +108,38 @@ function startBlocker() {
             if (typeof user !== "undefined") {
                 doBlock($("#signout-form input.authenticity_token").val(), user.id, user.name);
             }
+            else {
+                break;
+            }
         }
     },40);
+}
+function startExporter() {
+    blockerInterval = setInterval(function() {
+        for (var i=0;i<batchBlockCount;i++) {
+            var user = userQueue.dequeue();
+            if (typeof user !== "undefined") {
+                doExport(user.id, user.name);
+            }
+            else {
+                break;
+            }
+        }
+    },40);
+}
+function startImporter(data) {
+    var index = 0;
+    totalCount = data.users.length;
+    $("#blockchain-dialog .totalCount").text(totalCount);
+    blockerInterval = setInterval(function() {
+        for(var i = 0; i < batchBlockCount && index < data.users.length; i++) {
+            var user = data.users[index];
+            if (typeof user !== "undefined") {
+                doBlock($("#signout-form input.authenticity_token").val(), user.id, user.name);
+            }
+            index++;
+        }
+    });
 }
 function doBlock(authenticity_token, user_id, user_name, callback) {
     $.ajax({
@@ -112,12 +164,26 @@ function doBlock(authenticity_token, user_id, user_name, callback) {
     }).always(function() {
         usersBlocked++;
         $("#blockchain-dialog .usersBlocked").text(usersBlocked);
-        if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
+        if ((
+                usersBlocked == totalCount 
+                || usersBlocked == usersFound
+                || (mode == 'import' && usersBlocked + errors >= totalCount && totalCount > 0)
+            ) && totalCount > 0) {
             clearInterval(blockerInterval);
             blockerInterval = false;
             saveBlockingReceipts();
         }
     });
+}
+function doExport(user_id, user_name, callback) {
+    userExport.users.push({id: user_id, name: user_name});
+    usersBlocked++;
+     $("#blockchain-dialog .usersBlocked").text(usersBlocked);
+    if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
+        clearInterval(blockerInterval);
+        blockerInterval = false;
+        showExport();
+    }
 }
 function saveBlockingReceipts() {
     if (Object.keys(queuedStorage).length <= 0)
@@ -146,6 +212,7 @@ function getProtectedUsers(callback) {
     });
 }
 function startBlockChain() {
+    mode = 'block';
     var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
     if (!result)
         return;
@@ -157,6 +224,45 @@ function startBlockChain() {
         startAccountFinder();
         startBlocker();
     });
+}
+function startExportChain() {
+    mode = 'export';
+    var result = confirm("Are you sure you want to export the usernames of all users on this page?");
+    if (!result)
+        return;
+    currentProfileName = getProfileUsername();
+    userExport = {
+        users: [],
+        type: connectionType, 
+        connection: currentProfileName, 
+        on: Date.now()
+    };
+    showDialog();
+    getProtectedUsers(function(items) {
+        protectedUsers = items;
+        usersSeenThisRun = {};
+        startAccountFinder();
+        startExporter();
+    });
+}
+
+function startImportChain(data) {
+    mode = 'import';
+    if (typeof data !== 'undefined') {
+        var result = confirm("Are you sure you want to block all "+data.users.length+" users in the import?");
+        if (!result)
+            return;
+        currentProfileName = data.connection;
+        connection = data.connection;
+        connectionType = data.connectionType;
+        getProtectedUsers(function(items) {
+            protectedUsers = items;
+            startImporter(data);
+        });
+    }
+    else {
+        showDialog();
+    }
 }
 
 function addUsersToBlockQueue() {
@@ -170,15 +276,22 @@ function addUsersToBlockQueue() {
             return true;
         }
         else {
-            usersSeenThisRun[username] = true;
+            if (countUsersSeenThisRun == true) {
+                usersSeenThisRun[username] = true;
+                if (Object.keys(usersSeenThisRun).length > 10) {
+                    countUsersSeenThisRun = false;
+                }
+            }
         }
         if ($(e).find('.user-actions.following').length > 0 || username in protectedUsers) {
             usersSkipped++;
             $("#blockchain-dialog .usersSkipped").text(usersSkipped);
             return true;
         }
-        if ($(e).find('.user-actions.blocked').length > 0) {
+        // only skip already blocked users in block mode
+        if (mode == 'block' && $(e).find('.user-actions.blocked').length > 0) {
             usersAlreadyBlocked++;
+            usersFound++;
             $("#blockchain-dialog .usersAlreadyBlocked").text(usersAlreadyBlocked);
             return true;
         }
@@ -190,8 +303,28 @@ function addUsersToBlockQueue() {
         });
     });
 }
-
+function showExport() {
+    $("#blockchain-dialog .usersFound").parent().hide();
+    $("#blockchain-dialog .usersSkipped").parent().hide();
+    $("#blockchain-dialog .usersAlreadyBlocked").parent().hide();
+    $("#blockchain-dialog .usersBlocked").parent().hide();
+    $("#blockchain-dialog .errorCount").parent().hide();
+    $("#blockchain-dialog #ImportExport").show().text(JSON.stringify(userExport));
+}
 function showDialog() {
+    usersBlocked = 0;
+    usersFound = 0;
+    usersAlreadyBlocked = 0;
+    usersSkipped = 0;
+    totalCount = 0;
+    errors = 0;
+    saveBlockingReceipts();
+    $("#blockchain-dialog .usersFound").text(usersFound);
+    $("#blockchain-dialog .usersSkipped").text(usersSkipped);
+    $("#blockchain-dialog .usersAlreadyBlocked").text(usersAlreadyBlocked);
+    $("#blockchain-dialog .usersBlocked").text(usersBlocked);
+    $("#blockchain-dialog .totalCount").text(totalCount);
+    $("#blockchain-dialog .errorCount").text(errors);        
     $("body").append(
 '<div id="blockchain-dialog" class="modal-container block-or-report-dialog block-selected report-user">'+
     '<div class="close-modal-background-target"></div>'+
@@ -204,9 +337,11 @@ function showDialog() {
             '<p>Found: <span class="usersFound"></span></p>'+
             '<p>Skipped: <span class="usersSkipped"></span></p>'+
             '<p>Already Blocked: <span class="usersAlreadyBlocked"></span></p>'+
-            '<p>Blocked: <span class="usersBlocked"></span></p>'+
+            '<p><span class="mode">Blocked</span>: <span class="usersBlocked"></span></p>'+
             '<p>Total: <span class="totalCount"></span></p>'+
             '<p>Errors: <span class="errorCount"></span></p>'+
+            '<textarea style="width:90%;height:100%;min-height:300px;display:none;" id="ImportExport"></textarea>'+
+            '<div style="display:none;"><button class="btn primary-btn" id="ImportStart">Start Import</button></div>'+
         '</div>'+
         '<div id="report-control" class="modal-body submit-section">'+
             '<div class="clearfix">'+
@@ -222,16 +357,51 @@ function showDialog() {
     '<div class="js-last-tabstop" tabindex="0"></div>'+
 '</div>'
     );
-    $("#blockchain-dialog").show().find("button").click(function() {
+    $("#blockchain-dialog .mode").text('Blocked');
+    if (mode == 'export') {
+        $("#blockchain-dialog .mode").text('Exported');
+        $("#blockchain-dialog .usersAlreadyBlocked").parent().hide();
+        $("#blockchain-dialog .errorCount").parent().hide();
+    }
+    if (mode == 'import') {
+        $("#blockchain-dialog #ImportStart").parent().show();
+        $("#blockchain-dialog #ImportExport").show()
+
+        $("#blockchain-dialog .usersFound").parent().hide();
+        $("#blockchain-dialog .usersSkipped").parent().hide();
+        $("#blockchain-dialog .usersBlocked").parent().hide();
+        $("#blockchain-dialog .totalCount").parent().hide();
+        $("#blockchain-dialog .errorCount").parent().hide();
+
+        $("#blockchain-dialog .usersAlreadyBlocked").parent().hide();
+    }
+    $("#blockchain-dialog #ImportStart").click(function() {
+        try {
+            var source = JSON.parse($("#ImportExport").val());
+            if (source) {
+                startImportChain(source);
+                $("#ImportExport").text('');
+                $("#blockchain-dialog .usersBlocked").parent().show();
+                $("#blockchain-dialog .totalCount").parent().show();
+                $("#blockchain-dialog .errorCount").parent().show();
+                $("#blockchain-dialog #ImportExport").hide();
+                $("#blockchain-dialog #ImportStart").parent().hide();
+            }
+        }
+        catch(e) {
+            alert('There was a problem importing this data. It appears to be corrupt.');
+            console.log(e);
+        }
+    });
+    $("#blockchain-dialog").show().find("button.js-close").click(function() {
+        totalCount = usersBlocked;
+        errors += usersFound-usersBlocked;
         clearInterval(blockerInterval);
+        blockerInterval = false;
         clearInterval(scrollerInterval);
+        scrollerInterval = false;
         clearInterval(finderInterval);
-        usersBlocked = 0;
-        usersFound = 0;
-        usersAlreadyBlocked = 0;
-        usersSkipped = 0;
-        totalCount = 0;
-        errors = 0;
+        finderInterval = false;
         saveBlockingReceipts();
         $("#blockchain-dialog .usersFound").text(usersFound);
         $("#blockchain-dialog .usersSkipped").text(usersSkipped);
@@ -239,7 +409,17 @@ function showDialog() {
         $("#blockchain-dialog .usersBlocked").text(usersBlocked);
         $("#blockchain-dialog .totalCount").text(totalCount);
         $("#blockchain-dialog .errorCount").text(errors);
-        $("#blockchain-dialog").hide();
+        if (mode == 'export') {
+            if ($("#blockchain-dialog #ImportExport").is(":visible")) {
+                $("#blockchain-dialog").hide();
+            }
+            else {
+                showExport();
+            }
+        }
+        else {
+            $("#blockchain-dialog").hide();
+        }
         // piggybacking on chrome's storage class to send an event to our background page.
         if (typeof chrome !== "undefined") {
             chrome.storage.local.set({removeImageBlock: Math.random()});
