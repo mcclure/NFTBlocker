@@ -4,19 +4,19 @@
   "id": "twitterblockchain@satsuki.tv",
   "description": "A twitter blocking tool to block everyone who follows or is followed by a user.",
   "repository": "satsukitv/twitter-block-chain",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "main": "lib/main.js",
   "icon": "data/icon32.png",
   "icon64": "data/icon64.png",
   "engines": {
-    "firefox": ">=34.0"
+    "firefox": ">=48.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-compress": "^0.13.0",
     "grunt-contrib-copy": "^0.8.0",
-    "grunt-jpm": "satsukitv/grunt-jpm",
     "grunt-curl": "~2.2.0",
+    "grunt-jpm": "satsukitv/grunt-jpm",
     "grunt-mozilla-addon-sdk": "satsukitv/grunt-mozilla-addon-sdk"
   }
 }

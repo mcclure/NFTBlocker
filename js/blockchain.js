@@ -5,8 +5,7 @@ var usersBlocked = 0,
     totalCount = 0,
     errors = 0;
 var batchBlockCount = 5;
-var scrollerInterval = false,
-    finderInterval = false,
+var finderRunning = true,
     blockerInterval = false;
 var userQueue = new Queue();
 var currentProfileName = "";
@@ -27,7 +26,7 @@ if (typeof chrome !== "undefined") {
             if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0 || request.blockChainStart == 'import') {
                 sendResponse({ack: true});
                 if (request.blockChainStart == 'block') {
-                    startBlockChain();    
+                    startBlockChain();
                 }
                 else if (request.blockChainStart == 'export') {
                     startExportChain();
@@ -58,48 +57,91 @@ function getProfileUsername() {
     return $(".ProfileSidebar .ProfileHeaderCard .ProfileHeaderCard-screenname a span").text();
 }
 function startAccountFinder(callback) {
-    var finderCompleted = false;
-    var scrollerCompleted = false;
-    countUsersSeenThisRun = true;
-    if ($(".ProfileNav-item.ProfileNav--item--following.is-active").length==1) {
-        connectionType = "followed by";
-    }
-    else {
-        connectionType = "following";
-    }
-    scrollerInterval = setInterval(function() {
-        // megadom
-        if ($(".GridTimeline-items .Grid.Grid--withGutter").length>50) {
-            $(".GridTimeline-items .Grid.Grid--withGutter").slice(0,25).remove();
-            window.scroll(0, 0);
-            return;
+    finderRunning = true;
+    var profileUsername = getProfileUsername();
+    var position = $(".GridTimeline-items").data('min-position');
+    var positionKeyname = "position-"+profileUsername;
+    var lastRequestTime = Date.now();
+    var apiPart = window.location.href.split("/");
+    apiPart = apiPart[apiPart.length-1];
+    function processData(data) {
+        var scratch_usersSkipped = 0;
+        var scratch_usersAlreadyBlocked = 0;
+        var scratch_usersFound = 0;
+        data.items_html = data.items_html.replace(/src\=\".+\"/g,'').replace(/url\(.+\)/g,'');
+        var items_html = $(data.items_html);
+        var users = $.map(items_html.find('.ProfileCard'), function(element) {
+            element = $(element);
+            var username = element.data('screen-name');
+            var id = element.data('user-id');
+            if ($(element).find('.user-actions.following').length > 0 || username in protectedUsers) {
+                scratch_usersSkipped++;
+                return null;
+            }
+            scratch_usersFound++;
+            // only skip already blocked users in block mode
+            if (mode == 'block' && $(element).find('.user-actions.blocked').length > 0) {
+                scratch_usersAlreadyBlocked++;
+                return null;
+            }
+            return {username: username, id: id};
+        });
+        usersFound+=scratch_usersFound;
+        usersSkipped+=scratch_usersSkipped;
+        usersAlreadyBlocked+=scratch_usersAlreadyBlocked;
+        $("#blockchain-dialog .usersAlreadyBlocked").text(usersAlreadyBlocked);
+        $("#blockchain-dialog .usersSkipped").text(usersSkipped);
+        $("#blockchain-dialog .usersFound").text(usersFound);
+        users = users.filter(function(username) { return username !== null });
+        users.forEach(function(user) {
+            userQueue.enqueue({
+                name: user.username,
+                id: user.id
+            });
+        });
+        if (data.has_more_items && finderRunning) {
+            position = data.min_position;
+            var delay = 500;
+            delay -= (Date.now() - lastRequestTime);
+            delay = Math.max(1, delay);
+            setTimeout(getData,  delay); // 500ms to reduce rate limiting
         }
-        // find DOM to eat
-        if ($(".ProfileCard.blockchain-added").length > 100) {
-            $(".ProfileCard.blockchain-added").empty().css({height: '281px'});
-            window.scroll(0, $(document).height()-500);
-        }
-        window.scroll(0, $(document).height());
-        if ($(".GridTimeline-end.has-more-items").length==0 || scrollerCompleted) {
-            clearInterval(scrollerInterval);
-            scrollerInterval = false;
-            scrollerCompleted = true;
-        }
-    },500);
-    finderInterval = setInterval(function() {
-        addUsersToBlockQueue();
-        if (scrollerCompleted) {
-            totalCount = usersFound;
+        else {
+            finderRunning = false;
+            storage.setLocal({positionKeyname: null}, function(){})
+            totalCount = usersFound + usersSkipped;
             $("#blockchain-dialog .totalCount").text(totalCount);
+            if (callback) callback();
         }
-        if ((usersFound==totalCount && totalCount > 0) || finderCompleted) {
-            clearInterval(finderInterval);
-            finderInterval = false;
-            finderCompleted = true;
-            if (finderCompleted && scrollerCompleted && callback)
-                callback();
-        }
-    },1000);
+    }
+    function getData() {
+        if (!finderRunning) return false;
+        lastRequestTime = Date.now();
+        $.ajax({
+            url: 'https://twitter.com/'+profileUsername+'/'+apiPart+'/users?include_available_features=1&include_entities=1&reset_error_state=false&max_position='+position,
+            method: 'GET',
+            dataType: 'json'
+        })
+        .done(processData)
+        .fail(error);
+    }
+    function error(data) {
+        console.log(data);
+        finderRunning = false;
+        storage.setLocal({positionKeyname: position}, function() {
+            alert('There was an error retrieving more accounts. Please refresh the page and try again.');
+            if (callback) callback();
+        });
+    }
+    storage.getLocal(positionKeyname, function(data) {
+        if (typeof data === "string") position = data;
+        processData({
+            items_html: $(".GridTimeline-items").html(),
+            has_more_items: true,
+            min_position: position
+        });
+        $(".GridTimeline-items").hide();
+    })
 }
 function startBlocker() {
     blockerInterval = setInterval(function() {
@@ -168,7 +210,7 @@ function doBlock(authenticity_token, user_id, user_name, callback) {
                 usersBlocked == totalCount 
                 || usersBlocked == usersFound
                 || (mode == 'import' && usersBlocked + errors >= totalCount && totalCount > 0)
-            ) && totalCount > 0) {
+            ) && totalCount > 0 && !finderRunning) {
             clearInterval(blockerInterval);
             blockerInterval = false;
             saveBlockingReceipts();
@@ -265,44 +307,6 @@ function startImportChain(data) {
     }
 }
 
-function addUsersToBlockQueue() {
-    $(".ProfileCard:not(.blockchain-added)").each(function(i,e) {
-        $(e).addClass("blockchain-added");
-        var username = $(e).data('screen-name');
-        // check if we've blocked this username already. if so, we've looped through
-        if (username in usersSeenThisRun) {
-            scrollerCompleted = true;
-            finderCompleted = true;
-            return true;
-        }
-        else {
-            if (countUsersSeenThisRun == true) {
-                usersSeenThisRun[username] = true;
-                if (Object.keys(usersSeenThisRun).length > 10) {
-                    countUsersSeenThisRun = false;
-                }
-            }
-        }
-        if ($(e).find('.user-actions.following').length > 0 || username in protectedUsers) {
-            usersSkipped++;
-            $("#blockchain-dialog .usersSkipped").text(usersSkipped);
-            return true;
-        }
-        // only skip already blocked users in block mode
-        if (mode == 'block' && $(e).find('.user-actions.blocked').length > 0) {
-            usersAlreadyBlocked++;
-            usersFound++;
-            $("#blockchain-dialog .usersAlreadyBlocked").text(usersAlreadyBlocked);
-            return true;
-        }
-        usersFound++;
-        $("#blockchain-dialog .usersFound").text(usersFound);
-        userQueue.enqueue({
-            name: username,
-            id: String($(e).data('user-id'))
-        });
-    });
-}
 function showExport() {
     $("#blockchain-dialog .usersFound").parent().hide();
     $("#blockchain-dialog .usersSkipped").parent().hide();
@@ -345,7 +349,7 @@ function showDialog() {
         '</div>'+
         '<div id="report-control" class="modal-body submit-section">'+
             '<div class="clearfix">'+
-                '<button id="done" class="btn primary-btn report-tweet-next-button" type="button">Done</button>'+
+                '<button id="done" class="btn primary-btn js-close" type="button">Done</button>'+
             '</div>'+
         '</div>'+
     '</div>'+
@@ -398,10 +402,7 @@ function showDialog() {
         errors += usersFound-usersBlocked;
         clearInterval(blockerInterval);
         blockerInterval = false;
-        clearInterval(scrollerInterval);
-        scrollerInterval = false;
-        clearInterval(finderInterval);
-        finderInterval = false;
+        finderRunning = false;
         saveBlockingReceipts();
         $("#blockchain-dialog .usersFound").text(usersFound);
         $("#blockchain-dialog .usersSkipped").text(usersSkipped);
@@ -419,10 +420,6 @@ function showDialog() {
         }
         else {
             $("#blockchain-dialog").hide();
-        }
-        // piggybacking on chrome's storage class to send an event to our background page.
-        if (typeof chrome !== "undefined") {
-            chrome.storage.local.set({removeImageBlock: Math.random()});
         }
     });
 }
