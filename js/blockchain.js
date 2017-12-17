@@ -19,39 +19,25 @@ var mode = 'block'; // [block, export, import];
 
 var storage = new ExtensionStorage();
 
-if (typeof chrome !== "undefined") {
-    chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-        if (typeof request.blockChainStart !== "undefined") {
-            if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0 || request.blockChainStart == 'import') {
-                sendResponse({ack: true});
-                if (request.blockChainStart == 'block') {
-                    startBlockChain();
-                }
-                else if (request.blockChainStart == 'export') {
-                    startExportChain();
-                }
-                else if (request.blockChainStart == 'import') {
-                    startImportChain();
-                }
-            }
-            else {
-                sendResponse({error: true, error_description: 'Navigate to a twitter following or followers page.'});
-            }
-        }
-    });
-}
-else {
-    self.port.on("blockChainStart", function(message) {
-        if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0 && message.mode != 'import') {
-                self.port.emit("ack",true);
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (typeof request.blockChainStart !== "undefined") {
+        if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0 || request.blockChainStart == 'import') {
+            sendResponse({ack: true});
+            if (request.blockChainStart == 'block') {
                 startBlockChain();
             }
-            else {
-                self.port.emit("error",'Navigate to a twitter following or followers page.');
+            else if (request.blockChainStart == 'export') {
+                startExportChain();
             }
-    });
-}
+            else if (request.blockChainStart == 'import') {
+                startImportChain();
+            }
+        }
+        else {
+            sendResponse({error: true, error_description: 'Navigate to a twitter following or followers page.'});
+        }
+    }
+});
 
 function getProfileUsername() {
     return $(".ProfileSidebar .ProfileHeaderCard .ProfileHeaderCard-screenname a span").text();
