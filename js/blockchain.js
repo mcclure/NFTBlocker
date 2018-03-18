@@ -19,7 +19,15 @@ var mode = 'block'; // [block, export, import];
 
 var storage = new ExtensionStorage();
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+if (typeof XPCNativeWrapper === 'function') {
+    // In Firefox, XHR($.ajax) doesn't send Referer header.
+    // see: https://discourse.mozilla.org/t/webextension-xmlhttprequest-issues-no-cookies-or-referrer-solved/11224/9
+    $.ajaxSettings.xhr = function () {
+        return XPCNativeWrapper(new window.wrappedJSObject.XMLHttpRequest())
+    }
+}
+
+browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (typeof request.blockChainStart !== "undefined") {
         if ($(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0 || request.blockChainStart == 'import') {
             sendResponse({ack: true});

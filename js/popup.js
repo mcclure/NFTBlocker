@@ -12,7 +12,7 @@ function getCurrentTabUrl(callback) {
     currentWindow: true
   };
 
-  chrome.tabs.query(queryInfo, function(tabs) {
+  browser.tabs.query(queryInfo).then(function(tabs) {
     // chrome.tabs.query invokes the callback with a list of tabs that match the
     // query. When the popup is opened, there is certainly a window and at least
     // one tab, so we can safely assume that |tabs| is a non-empty array.
@@ -54,15 +54,15 @@ function renderStatus(statusText) {
   document.getElementById('status').style.display = 'block';
 }
 function runBlockchain(type) {
-  chrome.storage.local.set({removeImageBlock: Math.random()});
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, {blockChainStart: type}, function(response) {
+  browser.storage.local.set({removeImageBlock: Math.random()});
+  browser.tabs.query({active: true, currentWindow: true}).then(function(tabs) {
+      browser.tabs.sendMessage(tabs[0].id, {blockChainStart: type}).then(function(response) {
           console.log(response);
           if (typeof response !== "undefined" && typeof response.error !== "undefined")
               renderStatus(response.error_description);
       });
       // piggybacking on chrome's storage class to send an event to our background page.
-      chrome.storage.local.set({addImageBlock: Math.random(), tabId: tabs[0].id});
+      browser.storage.local.set({addImageBlock: Math.random(), tabId: tabs[0].id});
   });
 }
 document.addEventListener('DOMContentLoaded', function() {
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('runExportchain').addEventListener("click", function() { runBlockchain('export'); });
   document.getElementById('runImportchain').addEventListener("click", function() { runBlockchain('import'); });
   getCurrentTabUrl(function(url) {
-    chrome.storage.local.set({removeImageBlock: Math.random()});
+    browser.storage.local.set({removeImageBlock: Math.random()});
     if (url.match(/^https\:\/\/twitter\.com/)) {
         showOptions();
     }

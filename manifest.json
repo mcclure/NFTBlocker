@@ -26,7 +26,13 @@
     {
       "matches": ["https://www.twitter.com/*","https://twitter.com/*"],
       "css": ["css/content.css"],
-      "js": ["js/Queue.js","js/ExtensionStorage.js","bower_components/jquery/dist/jquery.min.js","js/blockchain.js"]
+      "js": [
+        "js/browser-polyfill.min.js",
+        "js/Queue.js",
+        "js/ExtensionStorage.js",
+        "bower_components/jquery/dist/jquery.min.js",
+        "js/blockchain.js"
+      ]
     }
   ]
 }
