@@ -1,22 +1,22 @@
 function ExtensionStorage() {
     this.getLocal = function (key, callback) {
-        chrome.storage.local.get(key, callback)
+        browser.storage.local.get(key).then(callback)
     };
     this.setLocal = function (data, callback) {
-        chrome.storage.local.set(data, callback)
+        browser.storage.local.set(data).then(callback)
     };
     this.getSync = function (key, callback) {
-        if (chrome.storage.sync) {
-            chrome.storage.sync.get(key, callback)
+        if (browser.storage.sync) {
+            browser.storage.sync.get(key).then(callback)
         } else {
-            chrome.storage.local.get(key, callback)
+            browser.storage.local.get(key).then(callback)
         }
     };
     this.setSync = function (data, callback) {
-        if (chrome.storage.sync) {
-            chrome.storage.sync.set(data, callback)
+        if (browser.storage.sync) {
+            browser.storage.sync.set(data).then(callback)
         } else {
-            chrome.storage.local.set(data, callback)
+            browser.storage.local.set(data).then(callback)
         }
     }
 }
