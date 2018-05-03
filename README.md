@@ -14,7 +14,6 @@ Firefox users can install the extension here: [Mozilla Add-ons](https://addons.m
 
 * Building requires `grunt` and `grunt-cli`
 * Chrome: `grunt build-chrome`
-* Firefox: `grunt build-firefox`
 
 # FAQs 
 
