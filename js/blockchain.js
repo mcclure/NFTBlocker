@@ -241,9 +241,11 @@ function saveBlockingReceipts() {
 }
 function getProtectedUsers(callback) {
     storage.getSync("protectedUsers",function(items) {
-        var users = items.protectedUsers;
-        if (typeof users === "undefined")
+        var users;
+        if (!items || !items.protectedUsers)
             users = {};
+        else
+            users = items.protectedUsers;
         callback(users);
     });
 }
