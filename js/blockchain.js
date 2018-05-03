@@ -190,10 +190,10 @@ function doBlock(authenticity_token, user_id, user_name, callback) {
         dataType: 'json',
         data: {
             authenticity_token: authenticity_token,
-            block_user: true,
+            challenges_passed: false,
+            handles_challenges: 1,
             impression_id: "",
-            report_type: "",
-            screen_name: user_name,
+            //screen_name: user_name,
             user_id: String(user_id)
         }
     }).done(function(response) {
