@@ -20,6 +20,7 @@ module.exports = function(grunt) {
                     {src: 'bower_components/angular/angular.min.js', dest: ''},
                     {src: 'bower_components/angular-route/angular-route.min.js', dest: ''},
                     {src: 'bower_components/bootstrap/dist/css/bootstrap.min.css', dest: ''},
+                    {src: 'bower_components/bootstrap/dist/js/bootstrap.min.js', dest: ''},
                     {src: 'bower_components/jquery/dist/jquery.min.js', dest: ''},
                     {src: 'bower_components/angular-datatables/dist/angular-datatables.min.js', dest: ''},
                     {src: 'bower_components/datatables/media/js/jquery.dataTables.min.js', dest: ''},

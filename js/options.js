@@ -24,8 +24,13 @@ optionsApp.factory('StorageService', function() {
 });
 
 optionsApp.controller('ReceiptsController', ['StorageService', '$scope', function(StorageService, $scope) {
-    $scope.should = {};
-    $scope.should.refreshTable = false;
+    $scope.currentPage = 0;
+    $scope.pages = [];
+    $scope.data = {
+        search: ''
+    };
+    var originalDataset = null;
+    const amount = 50;
     StorageService.getLocal("blockingReceipts",function(items) {
         var dataset = [];
         for(var username in items.blockingReceipts) {
@@ -33,9 +38,44 @@ optionsApp.controller('ReceiptsController', ['StorageService', '$scope', functio
             receipt.username = username;
             dataset.push( receipt );
         }
+        originalDataset = dataset;
         $scope.receipts = dataset;
-        $scope.should.refreshTable = true;
+        sliceReceipts();
+        makePageArray();
+        $scope.$apply();
     });
+    $scope.setPage = setPage;
+    $scope.getNumOfPages = getNumOfPages;
+    $scope.$watch('data.search', function() {
+        if (originalDataset) {
+            filterDataset();
+            sliceReceipts();
+            makePageArray();
+        }
+    });
+    function filterDataset() {
+        $scope.receipts = originalDataset.filter((item) => {
+            return item.username.toLowerCase().indexOf($scope.data.search.toLowerCase()) > -1
+            || item.connection.toLowerCase().indexOf($scope.data.search.toLowerCase()) > -1;
+        });
+    }
+    function sliceReceipts() {
+        $scope.slicedReceipts = $scope.receipts.slice($scope.currentPage * amount, ($scope.currentPage + 1) * amount);
+    }
+    function getNumOfPages() {
+        return Math.floor($scope.receipts.length / amount) + 1;
+    }
+    function makePageArray() {
+        $scope.pages = [];
+        for (var i = 0; i < getNumOfPages(); i++) {
+            $scope.pages.push(i);
+        }
+    }
+    function setPage(num) {
+        if (num >= 0 && num < getNumOfPages())
+        $scope.currentPage = num;
+        sliceReceipts();
+    }
 }]);
 
 optionsApp.controller('ProtectedController', ['StorageService', '$scope', function(StorageService, $scope) {

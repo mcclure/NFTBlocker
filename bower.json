@@ -4,7 +4,7 @@
   "version": "1.6.0",
   "homepage": "https://github.com/satsukitv/twitter-block-chain",
   "authors": [
-    "Charlie <me@satsuki.tv>"
+    "Cecelia Wren <cecelia.wren@gmail.com>"
   ],
   "description": "Chrome extension that enables twitter users to block everyone that follows, or is followed by another twitter user.",
   "license": "MIT",
