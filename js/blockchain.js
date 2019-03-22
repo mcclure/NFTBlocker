@@ -258,7 +258,7 @@ class WebTwitter {
 }
 class MobileTwitter {
     getProfileUsername() {
-        return window.location.href.match(/twitter\.com\/(.+?)\/followers/)[1];
+        return window.location.href.match(/twitter\.com\/(.+?)\/(followers|following)/)[1];
     }
     _getCSRFCookie() {
         return getCookie(mobileTwitterCSRFCookieKey);
@@ -295,7 +295,10 @@ class MobileTwitter {
     startAccountFinder() {
         finderRunning = true;
         const profileUsername = currentProfileName;
-        const requestType = window.location.href.split("/").pop();
+        let requestType = window.location.href.split("/").pop();
+        if (requestType === 'following') {
+            requestType = 'friends'
+        }
         let position = $(".GridTimeline-items").data('min-position');
         let lastRequestTime = Date.now();
         let cursor = null;
@@ -329,7 +332,7 @@ class MobileTwitter {
                     i++;
                 }
                 chunks = chunks.map((element) => {
-                    let url = 'https://api.twitter.com/1.1/users/lookup.json?include_entities=true'
+                    let url = 'https://api.twitter.com/1.1/users/lookup.json?include_entities=true&include_blocking=true'
                     return this._makeRequest({
                         url: url,
                         headers: {
@@ -420,11 +423,7 @@ class MobileTwitter {
         _recursiveCall();
     }
     _shouldStopBlocker() {
-        return ((
-            usersBlocked == totalCount ||
-            usersBlocked == usersFound ||
-            (mode == 'import' && usersBlocked + errors >= totalCount && totalCount > 0)
-        ) && totalCount > 0 && !finderRunning);
+        return ((usersBlocked >= usersFound - usersAlreadyBlocked) && !finderRunning);
     }
     _doBlock(user) {
         return this._makeRequest({
@@ -441,30 +440,34 @@ class MobileTwitter {
             errors++;
         }).then(() => {
             usersBlocked++;
-            UpdateDialog();
             if (this._shouldStopBlocker()) {
+                totalCount = usersBlocked + usersSkipped + usersAlreadyBlocked;
                 blockerRunning = false;
                 saveBlockingReceipts();
             }
+            UpdateDialog();
         });
     }
     async startBlocker() {
         blockerRunning = true;
         while(blockerRunning) {
             await sleep(rateLimitWait);
-            for(var i = 0; i < batchBlockCount && userQueue.getLength() > 0; i++) {
+            for(var i = 0; i < batchBlockCount; i++) {
                 let user = userQueue.dequeue();
                 if (user) {
                     this._doBlock(user);
                 } else if (this._shouldStopBlocker()) {
+                    totalCount = usersBlocked + usersSkipped + usersAlreadyBlocked;
                     blockerRunning = false;
+                    saveBlockingReceipts();
+                    UpdateDialog();
                     return;
                 }
             }
         }
     }
     _shouldStopExporter() {
-        return ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0 && !finderRunning);
+        return ((usersBlocked >= usersFound - usersAlreadyBlocked) && !finderRunning);
     }
     _doExport(user) {
         userExport.users.push({
@@ -487,8 +490,10 @@ class MobileTwitter {
                 if (user) {
                     this._doExport(user);
                 } else if (this._shouldStopExporter()) {
+                    totalCount = usersBlocked + usersSkipped + usersAlreadyBlocked;
                     blockerRunning = false;
                     showExport();
+                    UpdateDialog();
                     return
                 }
             }
@@ -624,7 +629,7 @@ function showDialog() {
         '<div class="report-form">' +
         '<p>Found: <span class="usersFound"></span></p>' +
         '<p>Skipped: <span class="usersSkipped"></span></p>' +
-        '<p class="already-blocked">Already Blocked: <span class="usersAlreadyBlocked"></span></p>' +
+        '<p>Already Blocked: <span class="usersAlreadyBlocked"></span></p>' +
         '<p><span class="mode">Blocked</span>: <span class="usersBlocked"></span></p>' +
         '<p>Total: <span class="totalCount"></span></p>' +
         '<p>Errors: <span class="errorCount"></span></p>' +
@@ -645,9 +650,6 @@ function showDialog() {
         '<div class="js-last-tabstop" tabindex="0"></div>' +
         '</div>'
     );
-    if (isOnMobileTwitter()) {
-        $("#blockchain-dialog .usersAlreadyBlocked").parent().hide();
-    }
     $("#blockchain-dialog .usersFound").text(usersFound);
     $("#blockchain-dialog .usersSkipped").text(usersSkipped);
     $("#blockchain-dialog .usersAlreadyBlocked").text(usersAlreadyBlocked);
@@ -718,6 +720,7 @@ function UpdateDialog() {
     $("#blockchain-dialog .usersSkipped").text(usersSkipped);
     $("#blockchain-dialog .usersFound").text(usersFound);
     $("#blockchain-dialog .usersBlocked").text(usersBlocked);
+    $("#blockchain-dialog .totalCount").text(totalCount);
     $("#blockchain-dialog .errorCount").text(errors);
 }
 
