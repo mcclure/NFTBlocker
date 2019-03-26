@@ -25,12 +25,11 @@ How do I activate the plugin?
 
 Browse to a following/followers page on twitter and click the icon in the 
 toolbar on Chrome. If it says you're not on a following/followers page, try 
-refreshing first.
+refreshing the page and trying again.
 
 How do I stop the blocking?
 
-Click the X in the top right corner of the blocking report to stop all 
-blocking. Note that this will not unblock any users you have already blocked.
+Click "Done"
 
 How do I figure out who I blocked, and who they were following/followed by?
 
@@ -40,5 +39,5 @@ locally, and not synced to the cloud.
 
 # To Do / Possible Features
 
-* Output a JSON object of users from a page, to later feed into the extension.
 * Option to mute users instead of blocking them.
+* Option to skip users that are following you, but you are not following them.

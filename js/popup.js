@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('runImportchain').addEventListener("click", function() { runBlockchain('import'); });
   getCurrentTabUrl(function(url) {
     browser.storage.local.set({removeImageBlock: Math.random()});
-    if (url.match(/^https\:\/\/twitter\.com/)) {
+    if (url.indexOf("https://twitter.com") > -1 || url.indexOf("https://mobile.twitter.com") > -1) {
         showOptions();
     }
     else {

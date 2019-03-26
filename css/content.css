@@ -1,1 +1,108 @@
 #blockchain-dialog p {padding:1em;}
+
+/* NOTE:
+* #doc ~ #blockchain-dialog selector is for legacy desktop site.
+* #react-root ~ #blockchain-dialog selector is for new responsive site.
+*/
+
+#react-root ~ #blockchain-dialog {
+    background: rgba(0,0,0,0.5);
+    position: fixed;
+    overflow: hidden;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 5000;
+    display: flex;
+}
+
+.night-mode #react-root ~ #blockchain-dialog {
+    color: #fff;
+}
+
+#react-root ~ #blockchain-dialog .modal-content {
+    flex-grow: 1;
+    width: 90vw;
+    max-width: 600px;
+}
+
+#doc ~ #blockchain-dialog .modal {
+    top: 240px;
+    left: 470px;
+}
+
+#react-root ~ #blockchain-dialog .modal {
+    position: relative;
+    min-width: 320px;
+    margin: auto;
+    background-color: #fff;
+    border-radius: 15px;
+    top: 0!important;
+    left: 0!important;
+}
+
+.night-mode #react-root ~ #blockchain-dialog .modal {
+    background-color: #15202b
+}
+
+#react-root ~ #blockchain-dialog .modal-header {
+    border-bottom: 1px solid #eee;
+}
+
+.night-mode #react-root ~ #blockchain-dialog .modal-header {
+    border-bottom: 1px solid #38444D;
+}
+
+#react-root ~ #blockchain-dialog {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif
+}
+
+#react-root ~ #blockchain-dialog .modal-header .modal-title {
+    font-size: 24px;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#react-root ~ #blockchain-dialog .submit-section {
+    text-align: center;
+}
+
+#react-root ~ #blockchain-dialog .submit-section .clearfix {
+    display: inline-block;
+}
+
+#react-root ~ #blockchain-dialog .btn {
+    background-color: #ccc;
+    border: 0;
+    color: #333;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px 100px;
+    margin: 10px;
+    border-radius: 100px;
+}
+
+#react-root ~ #blockchain-dialog .primary-btn {
+    background-color: #1DA1F2;
+    color: #fff;
+}
+
+#react-root ~ #blockchain-dialog .modal-close {
+    background-color: transparent;
+    cursor: pointer;
+    height: 20px;
+    line-height: 0;
+    padding: 0;
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    width: 20px;
+    border: 0;
+    color: #fff;
+    font-size: 30px;
+    display: none;
+}

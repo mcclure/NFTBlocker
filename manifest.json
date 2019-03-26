@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Twitter Block Chain",
   "description": "Blocks all users on a following/followers page.",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "icons": { 
     "16": "images/icon16.png",
     "48": "images/icon48.png",
@@ -19,12 +19,18 @@
     "webRequest",
     "webRequestBlocking",
     "*://*.twimg.com/",
+    "https://api.twitter.com/",
+    "https://mobile.twitter.com/",
     "https://twitter.com/"
   ],
-  "options_page": "options.html",
+  "options_ui": {
+    "browser_style": true,
+    "open_in_tab": true,
+    "page": "options.html"
+  },
   "content_scripts": [
     {
-      "matches": ["https://www.twitter.com/*","https://twitter.com/*"],
+      "matches": ["https://mobile.twitter.com/*","https://twitter.com/*"],
       "css": ["css/content.css"],
       "js": [
         "js/browser-polyfill.min.js",
