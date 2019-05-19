@@ -4,7 +4,7 @@
   "id": "cecelia.wren@gmail.com",
   "description": "A twitter blocking tool to block everyone who follows or is followed by a user.",
   "repository": "satsukitv/twitter-block-chain",
-  "version": "1.7.0",
+  "version": "1.8.1",
   "main": "lib/main.js",
   "icon": "data/icon32.png",
   "icon64": "data/icon64.png",

@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Twitter Block Chain",
   "description": "Blocks all users on a following/followers page.",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "icons": { 
     "16": "images/icon16.png",
     "48": "images/icon48.png",
@@ -11,6 +11,10 @@
   "browser_action": {
     "default_icon": "images/icon.png",
     "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": ["js/background.js"],
+    "persistent": true
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [

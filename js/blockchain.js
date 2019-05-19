@@ -167,15 +167,22 @@ class WebTwitter {
             $(".GridTimeline-items").hide();
         })
     }
+    _shouldStopBlocker() {
+        return (
+            usersBlocked + usersSkipped >= usersFound ||
+            (mode == 'import' && usersBlocked + errors >= totalCount && totalCount > 0)
+        ) && totalCount > 0 && !finderRunning;
+    }
     async startBlocker() {
         blockerRunning = true;
         while(blockerRunning) {
             await sleep(rateLimitWait);
             var user = userQueue.dequeue();
             if (typeof user !== "undefined") {
-                this._doBlock($("#signout-form input.authenticity_token").val(), user.id, user.name);
-            } else {
+                this._doBlock($("#authenticity_token").val(), user.id, user.name);
+            } else if (this._shouldStopBlocker()) {
                 blockerRunning = false;
+                saveBlockingReceipts();
                 break;
             }
         }
@@ -202,7 +209,7 @@ class WebTwitter {
             await sleep(rateLimitWait);
             var user = data.users[index];
             if (typeof user !== "undefined") {
-                this._doBlock($("#signout-form input.authenticity_token").val(), user.id, user.name);
+                this._doBlock($("#authenticity_token").val(), user.id, user.name);
             }
             index++;
         }
@@ -220,24 +227,20 @@ class WebTwitter {
                 //screen_name: user_name,
                 user_id: String(user_id)
             }
-        }).done(function (response) {
+        }).done((response) => {
             queuedStorage[user_name] = {
                 type: connectionType,
                 connection: currentProfileName,
                 on: Date.now(),
                 id: String(user_id)
             };
-        }).fail(function (xhr, text, err) {
+        }).fail((xhr, text, err) => {
             errors++;
             UpdateDialog();
-        }).always(function () {
+        }).always(() => {
             usersBlocked++;
             $("#blockchain-dialog .usersBlocked").text(usersBlocked);
-            if ((
-                    usersBlocked == totalCount ||
-                    usersBlocked == usersFound ||
-                    (mode == 'import' && usersBlocked + errors >= totalCount && totalCount > 0)
-                ) && totalCount > 0 && !finderRunning) {
+            if (this._shouldStopBlocker()) {
                 blockerRunning = false;
                 saveBlockingReceipts();
             }
@@ -440,7 +443,7 @@ class MobileTwitter {
             errors++;
         }).then(() => {
             usersBlocked++;
-            if (this._shouldStopBlocker()) {
+            if (_shouldStopBlocker()) {
                 totalCount = usersBlocked + usersSkipped + usersAlreadyBlocked;
                 blockerRunning = false;
                 saveBlockingReceipts();
