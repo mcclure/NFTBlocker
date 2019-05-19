@@ -443,7 +443,7 @@ class MobileTwitter {
             errors++;
         }).then(() => {
             usersBlocked++;
-            if (_shouldStopBlocker()) {
+            if (this._shouldStopBlocker()) {
                 totalCount = usersBlocked + usersSkipped + usersAlreadyBlocked;
                 blockerRunning = false;
                 saveBlockingReceipts();
