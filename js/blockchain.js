@@ -16,7 +16,6 @@ var userExport = {};
 var mode = 'block'; // [block, export, import];
 
 var storage = new ExtensionStorage();
-const mobileTwitterBearerToken = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
 const mobileTwitterCSRFCookieKey = 'ct0';
 const rateLimitWait = 100;
 const otherWait = 10;
@@ -266,33 +265,23 @@ class MobileTwitter {
     _getCSRFCookie() {
         return getCookie(mobileTwitterCSRFCookieKey);
     }
-    _makeRequest(obj) {
-        const addtlHeaders = {
-            authorization: mobileTwitterBearerToken,
-            'x-csrf-token': this._getCSRFCookie()
-        };
-        if (obj.headers) {
-            Object.assign(obj.headers, addtlHeaders);
-        } else {
-            obj.headers = addtlHeaders;
-        }
+    _makeRequest(options) {
+        document.cookie = `${mobileTwitterCSRFCookieKey}=${this._getCSRFCookie()};`;
+        document.cookie = `auth_token=${getCookie('auth_token')};`;
         return new Promise((resolve, reject) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open(obj.method || "GET", obj.url);
-            if (obj.headers) {
-                Object.keys(obj.headers).forEach(key => {
-                    xhr.setRequestHeader(key, obj.headers[key]);
-                });
-            }
-            xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve(xhr.response);
-                } else {
-                    reject(xhr.statusText);
+            chrome.runtime.sendMessage({
+                ...options,
+                contentScriptQuery: "doRequest",
+                auth_token: getCookie('auth_token'),
+                CSRFCookie: this._getCSRFCookie()
+            }, ({success, response}) => {
+                if (success) {
+                    resolve(response);
                 }
-            };
-            xhr.onerror = () => reject(xhr.statusText);
-            xhr.send(obj.body);
+                else {
+                    reject(response);
+                }
+            });
         });
     }
     startAccountFinder() {
@@ -308,14 +297,14 @@ class MobileTwitter {
         const _getIDData = () => {
             if (!finderRunning) return false;
             const count = 5000;
-            let url = `https://api.twitter.com/1.1/${requestType}/ids.json?screen_name=${profileUsername}&count=${count}&stringify_ids=true`
+            let url = `${requestType}/ids.json?screen_name=${profileUsername}&count=${count}&stringify_ids=true`
             if (cursor) url += `&cursor=${cursor}`
             lastRequestTime = Date.now();
             return this._makeRequest({
                 url: url,
                 method: 'GET'
             }).then((response) => {
-                let jsonData = JSON.parse(response);
+                let jsonData = response;
                 if (jsonData.hasOwnProperty('next_cursor_str') && jsonData.next_cursor_str != "0") {
                     cursor = jsonData.next_cursor_str;
                 } else {
@@ -335,7 +324,7 @@ class MobileTwitter {
                     i++;
                 }
                 chunks = chunks.map((element) => {
-                    let url = 'https://api.twitter.com/1.1/users/lookup.json?include_entities=true&include_blocking=true'
+                    let url = 'users/lookup.json?include_entities=true&include_blocking=true'
                     return this._makeRequest({
                         url: url,
                         headers: {
@@ -347,7 +336,7 @@ class MobileTwitter {
                 })
                 return Promise.all(chunks).then((values) => {
                     values = values.map((users) => {
-                        return JSON.parse(users);
+                        return users;
                     })
                     return {
                         users: values.flat(1)
@@ -430,7 +419,7 @@ class MobileTwitter {
     }
     _doBlock(user) {
         return this._makeRequest({
-            url: `https://api.twitter.com/1.1/blocks/create.json?user_id=${user.id}&skip_status=true&include_entities=false`,
+            url: `blocks/create.json?user_id=${user.id}&skip_status=true&include_entities=false`,
             method: 'POST'
         }).then((response) => {
             queuedStorage[user.name] = {
