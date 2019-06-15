@@ -46,7 +46,8 @@ function isOnTheRightPage() {
 }
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (typeof request.blockChainStart !== "undefined") {
-        if (isOnTheRightPage() || request.blockChainStart == 'import') {
+        var isImport = request.blockChainStart == 'import' || request.blockChainStart == 'importunblock'
+        if (isOnTheRightPage() || isImport) {
             sendResponse({
                 ack: true
             });
@@ -54,8 +55,8 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                 startBlockChain();
             } else if (request.blockChainStart == 'export') {
                 startExportChain();
-            } else if (request.blockChainStart == 'import') {
-                startImportChain();
+            } else if (isImport) {
+                startImportChain(undefined, request.blockChainStart == 'importunblock');
             }
         } else {
             sendResponse({
@@ -199,7 +200,7 @@ class WebTwitter {
             }
         }
     }
-    async startImporter(data) {
+    async startImporter(data, reverse) {
         var index = 0;
         totalCount = data.users.length;
         $("#blockchain-dialog .totalCount").text(totalCount);
@@ -208,14 +209,14 @@ class WebTwitter {
             await sleep(rateLimitWait);
             var user = data.users[index];
             if (typeof user !== "undefined") {
-                this._doBlock($("#authenticity_token").val(), user.id, user.name);
+                this._doBlock($("#authenticity_token").val(), user.id, user.name, reverse);
             }
             index++;
         }
     }
-    _doBlock(authenticity_token, user_id, user_name) {
+    _doBlock(authenticity_token, user_id, user_name, reverse) {
         $.ajax({
-            url: "https://twitter.com/i/user/block",
+            url: "https://twitter.com/i/user/" + (reverse ? "unblock" : "block"),
             method: "POST",
             dataType: 'json',
             data: {
@@ -417,9 +418,9 @@ class MobileTwitter {
     _shouldStopBlocker() {
         return ((usersBlocked >= usersFound - usersAlreadyBlocked) && !finderRunning);
     }
-    _doBlock(user) {
+    _doBlock(user, reverse) {
         return this._makeRequest({
-            url: `blocks/create.json?user_id=${user.id}&skip_status=true&include_entities=false`,
+            url: `blocks/${reverse ? "destroy" : "create"}.json?user_id=${user.id}&skip_status=true&include_entities=false`,
             method: 'POST'
         }).then((response) => {
             queuedStorage[user.name] = {
@@ -491,7 +492,7 @@ class MobileTwitter {
             }
         }
     }
-    async startImporter(data) {
+    async startImporter(data, reverse) {
         var index = 0;
         totalCount = data.users.length;
         UpdateDialog();
@@ -501,7 +502,7 @@ class MobileTwitter {
             for(var i = 0; i < batchBlockCount && index < data.users.length; i++) {
                 let user = data.users[index];
                 if (user) {
-                    this._doBlock(user);
+                    this._doBlock(user, reverse);
                 }
                 index++;
             }
@@ -582,10 +583,11 @@ function startExportChain() {
     });
 }
 
-function startImportChain(data) {
-    mode = 'import';
+function startImportChain(data, reverse) {
+    mode = 'import'
     if (typeof data !== 'undefined') {
-        var result = confirm("Are you sure you want to block all " + data.users.length + " users in the import?");
+        var b = reverse?"unb":"b"
+        var result = confirm(`Are you sure you want to ${b}lock all ${data.users.length} users in the import?`);
         if (!result)
             return;
         currentProfileName = data.connection;
@@ -593,10 +595,10 @@ function startImportChain(data) {
         connectionType = data.connectionType;
         getProtectedUsers(function (items) {
             protectedUsers = items;
-            api.startImporter(data);
+            api.startImporter(data, reverse);
         });
     } else {
-        showDialog();
+        showDialog(reverse);
     }
 }
 
@@ -609,20 +611,21 @@ function showExport() {
     $("#blockchain-dialog #ImportExport").show().text(JSON.stringify(userExport));
 }
 
-function showDialog() {
+function showDialog(reverse) {
+    var b = reverse?"Unb":"B"
     $("body").append(
         '<div id="blockchain-dialog" class="modal-container block-or-report-dialog block-selected report-user">' +
         '<div class="close-modal-background-target"></div>' +
         '<div class="modal modal-medium draggable" id="block-or-report-dialog-dialog" role="dialog" aria-labelledby="block-or-report-dialog-header" style="top: 240px; left: 470px;"><div class="js-first-tabstop" tabindex="0"></div>' +
         '<div class="modal-content" role="document">' +
         '<div class="modal-header">' +
-        '<h3 class="modal-title report-title" id="blockchain-dialog-header">Twitter Block Chain</h3>' +
+        `<h3 class="modal-title report-title" id="blockchain-dialog-header">Twitter ${b}lock Chain</h3>` +
         '</div>' +
         '<div class="report-form">' +
         '<p>Found: <span class="usersFound"></span></p>' +
         '<p>Skipped: <span class="usersSkipped"></span></p>' +
-        '<p>Already Blocked: <span class="usersAlreadyBlocked"></span></p>' +
-        '<p><span class="mode">Blocked</span>: <span class="usersBlocked"></span></p>' +
+        `<p>Already ${b}locked: <span class="usersAlreadyBlocked"></span></p>` +
+        `<p><span class="mode">${b}locked</span>: <span class="usersBlocked"></span></p>` +
         '<p>Total: <span class="totalCount"></span></p>' +
         '<p>Errors: <span class="errorCount"></span></p>' +
         '<textarea style="width:90%;height:100%;min-height:300px;display:none;" id="ImportExport"></textarea>' +
@@ -648,7 +651,7 @@ function showDialog() {
     $("#blockchain-dialog .usersBlocked").text(usersBlocked);
     $("#blockchain-dialog .totalCount").text(totalCount);
     $("#blockchain-dialog .errorCount").text(errors);
-    $("#blockchain-dialog .mode").text('Blocked');
+    $("#blockchain-dialog .mode").text(`${b}locked`);
     if (mode == 'export') {
         $("#blockchain-dialog .mode").text('Exported');
         $("#blockchain-dialog .usersAlreadyBlocked").parent().hide();
@@ -670,7 +673,7 @@ function showDialog() {
         try {
             var source = JSON.parse($("#ImportExport").val());
             if (source) {
-                startImportChain(source);
+                startImportChain(source, reverse);
                 $("#ImportExport").text('');
                 $("#blockchain-dialog .usersBlocked").parent().show();
                 $("#blockchain-dialog .totalCount").parent().show();
