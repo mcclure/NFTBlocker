@@ -354,7 +354,7 @@ class MobileTwitter {
             if (jsonData) {
                 var users = jsonData.users
                     .filter((element) => {
-                        if (element.following || element.screen_name in protectedUsers) {
+                        if (element.following || element.followed_by || element.screen_name in protectedUsers) {
                             scratch_usersSkipped++;
                             return false;
                         }
