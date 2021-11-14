@@ -1,8 +1,10 @@
-# Twitter Block Chain
+# NFTBlocker
 
-This browser extension helps users who are likely to be, or currently are being dog-piled.
-By navigating to a user's followers (or following) page and activating the 
-plugin, you can block all users on that page.
+This browser extension blocks people using Twitter's NFT integration feature. It is a work in progress.
+
+Currently the plugin works in Firefox. You must build it yourself.
+
+The current plan/status is [here](PLAN.md).
 
 # Installation
 
@@ -36,8 +38,3 @@ How do I figure out who I blocked, and who they were following/followed by?
 Right click the extension icon in Chrome and click Options. You can view all 
 blocks made on this page, including searching by username. Blocks are stored 
 locally, and not synced to the cloud.
-
-# To Do / Possible Features
-
-* Option to mute users instead of blocking them.
-* Option to skip users that are following you, but you are not following them.
