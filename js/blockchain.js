@@ -70,7 +70,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 // IMPORTANT:
 // To support multiple versions of the Twitter web interface, network and css interactions are encapsulated in these classes.
 // Two classes are included, WebTwitter and MobileTwitter. WebTwitter is *NO LONGER USED*.
-// As of 2021-11-25 web twitter on all platforms uses the interface this code calls MobileTwitter.
+// As of 2021-11-25 web twitter on all platforms uses the interface which this code calls MobileTwitter.
 
 class WebTwitter {
     getProfileUsername() {
@@ -353,15 +353,15 @@ class MobileTwitter {
             }
         }
         const _processData = (jsonData) => {
-            console.log("BLOCKER RUNNING")
-            console.log(jsonData)
             let scratch_usersFound = 0;
             let scratch_usersSkipped = 0;
             let scratch_usersAlreadyBlocked = 0;
             if (jsonData) {
                 var users = jsonData.users
                     .filter((element) => {
-                        if (element.following || element.followed_by || element.screen_name in protectedUsers) {
+                        if (/*element.following || element.followed_by*/
+                            !element.ext_has_nft_avatar
+                            || element.screen_name in protectedUsers) {
                             scratch_usersSkipped++;
                             return false;
                         }
