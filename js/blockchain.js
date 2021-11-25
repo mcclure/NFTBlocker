@@ -67,6 +67,11 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
 });
 
+// IMPORTANT:
+// To support multiple versions of the Twitter web interface, network and css interactions are encapsulated in these classes.
+// Two classes are included, WebTwitter and MobileTwitter. WebTwitter is *NO LONGER USED*.
+// As of 2021-11-25 web twitter on all platforms uses the interface this code calls MobileTwitter.
+
 class WebTwitter {
     getProfileUsername() {
         return $(".ProfileSidebar .ProfileHeaderCard .ProfileHeaderCard-screenname a span").text();
@@ -139,7 +144,7 @@ class WebTwitter {
             if (!finderRunning) return false;
             lastRequestTime = Date.now();
             $.ajax({
-                    url: 'https://twitter.com/' + profileUsername + '/' + apiPart + '/users?include_available_features=1&include_entities=1&reset_error_state=false&max_position=' + position,
+                    url: 'https://twitter.com/' + profileUsername + '/' + apiPart + '/users?include_available_features=1&include_entities=1&include_ext_has_nft_avatar=1&reset_error_state=false&max_position=' + position,
                     method: 'GET',
                     dataType: 'json'
                 })
@@ -325,7 +330,7 @@ class MobileTwitter {
                     i++;
                 }
                 chunks = chunks.map((element) => {
-                    let url = 'users/lookup.json?include_entities=true&include_blocking=true'
+                    let url = 'users/lookup.json?include_entities=true&include_blocking=true&include_ext_has_nft_avatar=1'
                     return this._makeRequest({
                         url: url,
                         headers: {
@@ -348,6 +353,8 @@ class MobileTwitter {
             }
         }
         const _processData = (jsonData) => {
+            console.log("BLOCKER RUNNING")
+            console.log(jsonData)
             let scratch_usersFound = 0;
             let scratch_usersSkipped = 0;
             let scratch_usersAlreadyBlocked = 0;
