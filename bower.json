@@ -1,12 +1,12 @@
 {
-  "name": "twitter-block-chain",
+  "name": "NFTBlocker",
   "main": "blockchain.js",
-  "version": "1.6.0",
-  "homepage": "https://github.com/satsukitv/twitter-block-chain",
+  "version": "0.1",
+  "homepage": "https://github.com/mcclure/NFTBlocker",
   "authors": [
     "Cecelia Wren <cecelia.wren@gmail.com>"
   ],
-  "description": "Chrome extension that enables twitter users to block everyone that follows, or is followed by another twitter user.",
+  "description": "Chrome extension that enables Twitter users to block people who use the NFT integration feature.",
   "license": "MIT",
   "private": true,
   "ignore": [

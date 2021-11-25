@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "Twitter Block Chain",
-  "description": "Blocks all users on a following/followers page.",
-  "version": "1.8.3",
+  "name": "NFTBlocker",
+  "description": "Blocks all NFT-using users on a following/followers page.",
+  "version": "0.1",
   "icons": { 
     "16": "images/icon16.png",
     "48": "images/icon48.png",

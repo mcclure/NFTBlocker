@@ -556,7 +556,7 @@ function getProtectedUsers(callback) {
 
 function startBlockChain() {
     mode = 'block';
-    var result = confirm("Are you sure you want to block all users on this page that you aren't following?");
+    var result = confirm("This will block all users on this page who have the NFT-avatar flag. Are you sure?");
     if (!result)
         return;
     currentProfileName = api.getProfileUsername();
@@ -571,7 +571,7 @@ function startBlockChain() {
 
 function startExportChain() {
     mode = 'export';
-    var result = confirm("Are you sure you want to export the usernames of all users on this page?");
+    var result = confirm("Are you sure you want to export the usernames of all NFT-avatar users on this page?");
     if (!result)
         return;
     currentProfileName = api.getProfileUsername();
@@ -619,14 +619,14 @@ function showExport() {
 }
 
 function showDialog(reverse) {
-    var b = reverse?"Unb":"B"
+    var b = reverse?"Unblock All":"NFT Block"
     $("body").append(
         '<div id="blockchain-dialog" class="modal-container block-or-report-dialog block-selected report-user">' +
         '<div class="close-modal-background-target"></div>' +
         '<div class="modal modal-medium draggable" id="block-or-report-dialog-dialog" role="dialog" aria-labelledby="block-or-report-dialog-header" style="top: 240px; left: 470px;"><div class="js-first-tabstop" tabindex="0"></div>' +
         '<div class="modal-content" role="document">' +
         '<div class="modal-header">' +
-        `<h3 class="modal-title report-title" id="blockchain-dialog-header">Twitter ${b}lock Chain</h3>` +
+        `<h3 class="modal-title report-title" id="blockchain-dialog-header">Twitter ${b}</h3>` +
         '</div>' +
         '<div class="report-form">' +
         '<p>Found: <span class="usersFound"></span></p>' +
