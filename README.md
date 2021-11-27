@@ -50,7 +50,7 @@ A future version of this plugin will hopefully be available on the Chrome/Firefo
 
 ## How can I help?
 
-If you know anything about or Twitter-hacking, PRs are appreciated. The project's TODO list is [here](PLAN.md).
+If you know anything about browser plugins or Twitter-hacking, PRs are appreciated. The project's TODO list is [here](PLAN.md).
 
 # Twitter Block Chain
 
