@@ -6,6 +6,7 @@
   "repository": "satsukitv/twitter-block-chain",
   "version": "0.1",
   "main": "lib/main.js",
+  "license": "MIT",
   "icon": "data/icon32.png",
   "icon64": "data/icon64.png",
   "devDependencies": {
