@@ -1,20 +1,5 @@
-const runtimeid = chrome.runtime.id;
 const mobileTwitterBearerToken = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
-chrome.webRequest.onBeforeSendHeaders.addListener(
-    function (details) {
-        //details holds all request information. 
-        for (var i = 0; i < details.requestHeaders.length; ++i) {
-            //Find and change the particular header.
-            if (details.requestHeaders[i].name === 'Origin' && details.requestHeaders[i].value == 'chrome-extension://' + runtimeid) {
-                details.requestHeaders[i].value = "https://twitter.com";
-                break;
-            }
-        }
-        return { requestHeaders: details.requestHeaders };
-    },
-    { urls: ['https://twitter.com/i/user/block'] },
-    ['blocking', 'requestHeaders']
-);
+
 function _makeRequest(obj) {
     const addtlHeaders = {
         authorization: mobileTwitterBearerToken,
