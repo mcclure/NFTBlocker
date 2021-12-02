@@ -20,8 +20,6 @@
   "permissions": [
     "storage",
     "activeTab",
-    "webRequest",
-    "webRequestBlocking",
     "*://*.twimg.com/",
     "https://api.twitter.com/",
     "https://mobile.twitter.com/",
