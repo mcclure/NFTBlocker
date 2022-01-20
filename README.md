@@ -1,6 +1,6 @@
 **Warning: Twitter monitors accounts for automated activity. This plugin is literally automated activity and may trip Twitter's bot detection. If you use this plugin, you will probably be required at some point to give Twitter your phone number to prove you are not a bot.** If after performing a mass block you find Twitter pages are no longer loading, try deleting your cookie, rebooting your browser and re-logging in.
 
-Instead of using this browser plugin, I recommend [Better Tweetdeck](https://better.tw/), which has a feature to mute NFT users (Twitter cannot detect this), or the [Antsstyle NFT Blocker](https://antsstyle.com/nftcryptoblocker/) app, which is fully compliant with the Twitter TOS (although it does require access privileges to your account).
+**Instead of using this browser plugin,** I recommend [Better Tweetdeck](https://better.tw/), which has a feature to mute NFT users (Twitter cannot detect this), or the [Antsstyle NFT Blocker](https://antsstyle.com/nftcryptoblocker/) app, which is fully compliant with the Twitter TOS (although it does require access privileges to your account).
 
 ## What is this?
 
