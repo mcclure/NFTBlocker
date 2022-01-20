@@ -1,6 +1,6 @@
 **Warning: Twitter monitors accounts for automated activity. This plugin is literally automated activity and may trip Twitter's bot detection. If you use this plugin, you will probably be required at some point to give Twitter your phone number to prove you are not a bot.** If after performing a mass block you find Twitter pages are no longer loading, try deleting your cookie, rebooting your browser and re-logging in.
 
-It may be better to use [Better Tweetdeck](https://better.tw/), which has a feature to mute NFT users. Twitter cannot detect this.
+Instead of using this browser plugin, I recommend [Better Tweetdeck](https://better.tw/), which has a feature to mute NFT users (Twitter cannot detect this), or the [Antsstyle NFT Blocker](https://antsstyle.com/nftcryptoblocker/) app, which is fully compliant with the Twitter TOS (although it does require access privileges to your account).
 
 ## What is this?
 
@@ -16,7 +16,7 @@ Three reasons.
 
 1. Because it is designed in a foolish way, the NFT system has a shocking amount of impact on global warming. The more demand there is to buy and sell NFTs, the higher the value of energy-wasting ("proof of work") cryptocurrencies goes and the more coal and oil these networks will burn. I don't want to be in a community with people who support that.
 
-2. The NFT market is rife with scams and art theft. Some people push back on NFTs because of this.
+2. The NFT market is rife with scams and art theft.
 
 3. In short, NFT users are just irritating to be around. People who bought NFTs have to keep hyping other people to buy NFTs or the NFTs they bought will lose value. Twitter NFT cliques are rife with sockpuppet accounts, dogpiling and indifferentiable monkey clones. Blocking NFT users just makes Twitter nicer.
 
