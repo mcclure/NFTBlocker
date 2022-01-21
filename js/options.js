@@ -91,7 +91,7 @@ optionsApp.controller('ProtectedController', ['StorageService', '$scope', functi
         $scope.$apply();
     });
     $scope.deleteProtection = function(user) {
-        var response = confirm("Are you sure you want to remove "+user.username+" from the protected users list?");
+        var response = confirm("Você tem certeza que quer remover "+user.username+" da lista de usuários protegidos?");
         if (!response)
             return;
         StorageService.getSync("protectedUsers",function(items) {
@@ -113,7 +113,7 @@ optionsApp.controller('AddProtectionController', ['StorageService', '$scope', '$
     $scope.submit = function() {
         $scope.error = false;
         if ($scope.user.username == "" || !$scope.user.username) {
-            $scope.error = "You must enter a username";
+            $scope.error = "Você precisa inserir um nome de usuário";
             return;
         }
         StorageService.getSync("protectedUsers",function(items) {
