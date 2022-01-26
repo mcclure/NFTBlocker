@@ -19,13 +19,6 @@ var storage = new ExtensionStorage();
 const mobileTwitterCSRFCookieKey = 'ct0';
 const rateLimitWait = 100;
 const otherWait = 10;
-if (typeof XPCNativeWrapper === 'function') {
-    // In Firefox, XHR($.ajax) doesn't send Referer header.
-    // see: https://discourse.mozilla.org/t/webextension-xmlhttprequest-issues-no-cookies-or-referrer-solved/11224/9
-    $.ajaxSettings.xhr = function () {
-        return XPCNativeWrapper(new window.wrappedJSObject.XMLHttpRequest())
-    }
-}
 
 function resetState() {
     usersBlocked = 0
@@ -38,11 +31,7 @@ function resetState() {
 }
 
 function isOnTheRightPage() {
-    if (!isOnMobileTwitter()) {
-        return $(".ProfileNav-item--followers.is-active, .ProfileNav-item--following.is-active").length > 0;
-    } else {
-        return api.getProfileUsername();
-    }
+    return api.getProfileUsername();
 }
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (typeof request.blockChainStart !== "undefined") {
@@ -67,203 +56,6 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
 });
 
-// IMPORTANT:
-// To support multiple versions of the Twitter web interface, network and css interactions are encapsulated in these classes.
-// Two classes are included, WebTwitter and MobileTwitter. WebTwitter is *NO LONGER USED*.
-// As of 2021-11-25 web twitter on all platforms uses the interface which this code calls MobileTwitter.
-
-class WebTwitter {
-    getProfileUsername() {
-        return $(".ProfileSidebar .ProfileHeaderCard .ProfileHeaderCard-screenname a span").text();
-    }
-    startAccountFinder() {
-        finderRunning = true;
-        var profileUsername = currentProfileName;
-        var position = $(".GridTimeline-items").data('min-position');
-        var positionKeyname = "position-" + profileUsername;
-        var lastRequestTime = Date.now();
-        var apiPart = window.location.href.split("/");
-        apiPart = apiPart[apiPart.length - 1];
-
-        function _processData(data) {
-            var scratch_usersSkipped = 0;
-            var scratch_usersAlreadyBlocked = 0;
-            var scratch_usersFound = 0;
-            data.items_html = data.items_html.replace(/src\=\".+\"/g, '').replace(/url\(.+\)/g, '');
-            var items_html = $(data.items_html);
-            var users = $.map(items_html.find('.ProfileCard'), function (element) {
-                element = $(element);
-                var username = element.data('screen-name');
-                var id = element.data('user-id');
-                if ($(element).find('.user-actions.following').length > 0 || username in protectedUsers) {
-                    scratch_usersSkipped++;
-                    return null;
-                }
-                scratch_usersFound++;
-                // only skip already blocked users in block mode
-                if (mode == 'block' && $(element).find('.user-actions.blocked').length > 0) {
-                    scratch_usersAlreadyBlocked++;
-                    return null;
-                }
-                return {
-                    username: username,
-                    id: id
-                };
-            });
-            usersFound += scratch_usersFound;
-            usersSkipped += scratch_usersSkipped;
-            usersAlreadyBlocked += scratch_usersAlreadyBlocked;
-            // @todo change to UpdateDialog()
-            UpdateDialog()
-            users = users.filter(function (username) {
-                return username != null
-            });
-            users.forEach(function (user) {
-                userQueue.enqueue({
-                    name: user.username,
-                    id: user.id
-                });
-            });
-            if (data.has_more_items && finderRunning) {
-                position = data.min_position;
-                var delay = 500;
-                delay -= (Date.now() - lastRequestTime);
-                delay = Math.max(1, delay);
-                setTimeout(_getData, delay); // 500ms to reduce rate limiting
-            } else {
-                finderRunning = false;
-                storage.setLocal({
-                    positionKeyname: null
-                }, function () {})
-                totalCount = usersFound + usersSkipped;
-                $("#blockchain-dialog .totalCount").text(totalCount);
-            }
-        }
-
-        function _getData() {
-            if (!finderRunning) return false;
-            lastRequestTime = Date.now();
-            $.ajax({
-                    url: 'https://twitter.com/' + profileUsername + '/' + apiPart + '/users?include_available_features=1&include_entities=1&include_ext_has_nft_avatar=1&reset_error_state=false&max_position=' + position,
-                    method: 'GET',
-                    dataType: 'json'
-                })
-                .done(_processData)
-                .fail(_error);
-        }
-
-        function _error(data) {
-            //console.log(data);
-            finderRunning = false;
-            storage.setLocal({
-                positionKeyname: position
-            }, function () {
-                alert('There was an error retrieving more accounts. Please refresh the page and try again.');
-                if (callback) callback();
-            });
-        }
-        storage.getLocal(positionKeyname, function (data) {
-            if (typeof data === "string") position = data;
-            _processData({
-                items_html: $(".GridTimeline-items").html(),
-                has_more_items: true,
-                min_position: position
-            });
-            $(".GridTimeline-items").hide();
-        })
-    }
-    _shouldStopBlocker() {
-        return (
-            usersBlocked + usersSkipped >= usersFound ||
-            (mode == 'import' && usersBlocked + errors >= totalCount && totalCount > 0)
-        ) && totalCount > 0 && !finderRunning;
-    }
-    async startBlocker() {
-        blockerRunning = true;
-        while(blockerRunning) {
-            await sleep(rateLimitWait);
-            var user = userQueue.dequeue();
-            if (typeof user !== "undefined") {
-                this._doBlock($("#authenticity_token").val(), user.id, user.name);
-            } else if (this._shouldStopBlocker()) {
-                blockerRunning = false;
-                saveBlockingReceipts();
-                break;
-            }
-        }
-    }
-    async startExporter() {
-        blockerRunning = true;
-        while(blockerRunning) {
-            await sleep(otherWait);
-            var user = userQueue.dequeue();
-            if (typeof user !== "undefined") {
-                this._doExport(user.id, user.name);
-            } else {
-                blockerRunning = false;
-                break;
-            }
-        }
-    }
-    async startImporter(data, reverse) {
-        var index = 0;
-        totalCount = data.users.length;
-        $("#blockchain-dialog .totalCount").text(totalCount);
-        blockerRunning = true;
-        while(blockerRunning) {
-            await sleep(rateLimitWait);
-            var user = data.users[index];
-            if (typeof user !== "undefined") {
-                this._doBlock($("#authenticity_token").val(), user.id, user.name, reverse);
-            }
-            index++;
-        }
-    }
-    _doBlock(authenticity_token, user_id, user_name, reverse) {
-        $.ajax({
-            url: "https://twitter.com/i/user/" + (reverse ? "unblock" : "block"),
-            method: "POST",
-            dataType: 'json',
-            data: {
-                authenticity_token: authenticity_token,
-                challenges_passed: false,
-                handles_challenges: 1,
-                impression_id: "",
-                //screen_name: user_name,
-                user_id: String(user_id)
-            }
-        }).done((response) => {
-            queuedStorage[user_name] = {
-                type: connectionType,
-                connection: currentProfileName,
-                on: Date.now(),
-                id: String(user_id)
-            };
-        }).fail((xhr, text, err) => {
-            errors++;
-            UpdateDialog();
-        }).always(() => {
-            usersBlocked++;
-            $("#blockchain-dialog .usersBlocked").text(usersBlocked);
-            if (this._shouldStopBlocker()) {
-                blockerRunning = false;
-                saveBlockingReceipts();
-            }
-        });
-    }
-    _doExport(user_id, user_name) {
-        userExport.users.push({
-            id: user_id,
-            name: user_name
-        });
-        usersBlocked++;
-        UpdateDialog();
-        if ((usersBlocked == totalCount || usersBlocked == usersFound) && totalCount > 0) {
-            blockerRunning();
-            showExport();
-        }
-    }
-}
 class MobileTwitter {
     getProfileUsername() {
         return window.location.href.match(/twitter\.com\/(.+?)\/(followers|following)/)[1];
@@ -297,15 +89,12 @@ class MobileTwitter {
         if (requestType === 'following') {
             requestType = 'friends'
         }
-        let position = $(".GridTimeline-items").data('min-position');
-        let lastRequestTime = Date.now();
         let cursor = null;
         const _getIDData = () => {
             if (!finderRunning) return false;
             const count = 5000;
             let url = `${requestType}/ids.json?screen_name=${profileUsername}&count=${count}&stringify_ids=true`
             if (cursor) url += `&cursor=${cursor}`
-            lastRequestTime = Date.now();
             return this._makeRequest({
                 url: url,
                 method: 'GET'
@@ -516,11 +305,7 @@ class MobileTwitter {
         }
     }
 }
-const api = (isOnMobileTwitter()) ? new MobileTwitter() : new WebTwitter();
-
-function isOnMobileTwitter() {
-    return document.getElementById("react-root");
-}
+const api = new MobileTwitter();
 
 function saveBlockingReceipts() {
     if (Object.keys(queuedStorage).length <= 0)
