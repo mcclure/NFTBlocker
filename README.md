@@ -34,9 +34,9 @@ This is an early prototype. Future versions of this plugin will scan your notifi
 
 ## How do I install this?
 
-You need the file `blockchain.zip`. download a blockchain.zip from the "releases" button to the right of this text.
+You need the file `blockchain.zip`. Download a blockchain.zip from the "releases" button to the right of this text. →
 
-Or, if you know what this means, you can build it yourself by running:
+Optionally, if you know what this means, you can build it yourself by running:
 
 	npm install
 	npx bower install
