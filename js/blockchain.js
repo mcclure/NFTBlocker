@@ -620,6 +620,7 @@ function showExport() {
 
 function showDialog(reverse) {
     var b = reverse?"Unblock All":"NFT Block"
+    var b2 = reverse?"unblock":"block"
     $("body").append(
         '<div id="blockchain-dialog" class="modal-container block-or-report-dialog block-selected report-user">' +
         '<div class="close-modal-background-target"></div>' +
@@ -631,8 +632,8 @@ function showDialog(reverse) {
         '<div class="report-form">' +
         '<p>Found: <span class="usersFound"></span></p>' +
         '<p>Skipped: <span class="usersSkipped"></span></p>' +
-        `<p>Already ${b}locked: <span class="usersAlreadyBlocked"></span></p>` +
-        `<p><span class="mode">${b}locked</span>: <span class="usersBlocked"></span></p>` +
+        `<p>Already ${b2}ed: <span class="usersAlreadyBlocked"></span></p>` +
+        `<p><span class="mode">${b2}ed</span>: <span class="usersBlocked"></span></p>` +
         '<p>Total: <span class="totalCount"></span></p>' +
         '<p>Errors: <span class="errorCount"></span></p>' +
         '<textarea style="width:90%;height:100%;min-height:300px;display:none;" id="ImportExport"></textarea>' +
@@ -658,7 +659,7 @@ function showDialog(reverse) {
     $("#blockchain-dialog .usersBlocked").text(usersBlocked);
     $("#blockchain-dialog .totalCount").text(totalCount);
     $("#blockchain-dialog .errorCount").text(errors);
-    $("#blockchain-dialog .mode").text(`${b}locked`);
+    $("#blockchain-dialog .mode").text(`${b}ed`);
     if (mode == 'export') {
         $("#blockchain-dialog .mode").text('Exported');
         $("#blockchain-dialog .usersAlreadyBlocked").parent().hide();
