@@ -22,7 +22,7 @@ Three reasons.
 
 ## How does this work?
 
-Twitter has a feature (currently in closed beta) where you can showcase an NFT in your profile. Probably they are doing this because Jack Dorsey is invested in cryptocurrency and if Twitter makes NFTs more popular, Jack Dorsey will make money.
+Twitter has a feature (currently in closed beta) where you can showcase an NFT in your profile. Probably they decided to do this because Jack Dorsey, who left the company shortly after the feature was announced, was invested in cryptocurrency and if Twitter makes NFTs more popular, Jack Dorsey will make money.
 
 This is a Firefox plugin that detects that feature in use. It adds a menu that you can use on a "Follower" or "Following" page:
 
@@ -34,19 +34,29 @@ This is an early prototype. Future versions of this plugin will scan your notifi
 
 ## How do I install this?
 
-You need the file `blockchain.zip`. If you know what this means, you can build it yourself by running:
+You need the file `blockchain.zip`. download a blockchain.zip from the "releases" button to the right of this text.
+
+Or, if you know what this means, you can build it yourself by running:
 
 	npm install
 	npx bower install
 	npx grunt build-chrome
 
-Or you can download a blockchain.zip from the "releases" button to the right of this text.
+### Installing in Firefox
 
 Once you have the zip file, go to `about:debugging#/runtime/this-firefox` in the Firefox URL bar. Click "load temporary add-on" and select blockchain.zip. Warning, **installing extensions this way is dangerous**. If I were evil, the blockchain.zip I uploaded could be stealing your passwords or credit card numbers. Don't install extensions this way unless you trust the source.
 
 ![Picture of installation button](install.png)
 
-A future version of this plugin will hopefully be available on the Chrome/Firefox app store. Again, may I recommend [Better Tweetdeck](https://better.tw/) and its NFT-muter feature.
+### Installing in Chrome
+
+For Chrome you will need to unzip the zip file. On Mac double-click blockchain.zip, or on Windows right-click and say "extract all".
+
+Now go into Chrome and enter `chrome://extensions/` into the URL bar. Click to turn on "Developer mode", then click "Load unpacked". Select the "blockchain" directory you just made.
+
+![Picture of installation button](install2.png)
+
+Again, **installing extensions this way is dangerous**, which is why Google makes you jump through hoops. A future version of this plugin will hopefully be available on the Chrome/Firefox app store. Again, may I recommend [Better Tweetdeck](https://better.tw/) and its NFT-muter feature.
 
 ## How can I help?
 
