@@ -1,6 +1,6 @@
 ## How to automatically block NFT users on Twitter
 
-Twitter has a feature where registered NFT owners get a hexagonal profile border. This is silly and bad, but it has an upside: It means you can now block NFT users on Twitter **automatically**, using any of the following tools.
+Twitter has a feature where registered NFT owners get a hexagonal profile border. This is silly and bad, but has an upside: It means you can now block NFT users on Twitter **automatically**, using any of the following tools.
 
 1. **[NoFT](https://noft.gg/)**
 
@@ -23,16 +23,16 @@ Twitter has a feature where registered NFT owners get a hexagonal profile border
 
     Because this app runs on its own server, it costs its operator money to run. If you want to support the app, the author has a [Patreon](https://www.patreon.com/antsstyle).
 
-3. **[BetterTweetdeck](https://better.tw/)**)
+3. **[Better TweetDeck](https://better.tw/)**
 
-	Works with: **Tweetdeck**  
+	Works with: **TweetDeck**  
 	Uses: **Hide posts by NFT users**.
 
-	[TweetDeck](https://tweetdeck.twitter.com/) is like a better version of Twitter. Better Tweetdeck makes Tweetdeck even better. One of its features is to hide tweets by NFT users. In other news, the NFT users will not be blocked or muted-- you just won't have to see their tweets. This is good because it means BTD **makes no permanent changes to your account**.
+	[TweetDeck](https://tweetdeck.twitter.com/) is like a better version of Twitter. Better TweetDeck makes TweetDeck even better. One of its features is to hide tweets by NFT users. In other news, the NFT users will not be blocked or muted-- you just won't have to see their tweets. This is good because it means BTD **makes no permanent changes to your account**.
 
 4. **[NFTBlocker](https://github.com/mcclure/NFTBlocker/tree/stable)**
 
-    Works with: **Chrome**, **Firefox**
+    Works with: **Chrome**, **Firefox**  
     Uses: **Block targeted networks of NFT users**
 
     This browser plugin is **old and you don't want to use it**. Use NoFT, which is newer and better. This plugin does only one thing, although it's something the other apps can't do: You can point at a "followers" or "following" page and block all registered NFT users.
