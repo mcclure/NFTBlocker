@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     else {
         // Put the image URL in Google search.
-        renderStatus('Navigate to a twitter following or followers page.');
+        renderStatus('Navegue até uma página de seguindo ou seguidores no Twitter.');
     }
   });
 });

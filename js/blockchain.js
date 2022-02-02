@@ -50,7 +50,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         } else {
             sendResponse({
                 error: true,
-                error_description: 'Navigate to a twitter following or followers page.'
+                error_description: 'Navegue até uma página de seguindo ou seguidores no Twitter'
             });
         }
     }
@@ -185,7 +185,7 @@ class MobileTwitter {
                     });
                 });
             } else {
-                throw new Error('There was no data returned from the server');
+                throw new Error('Não houve dados retornados do servidor');
             }
         }
         const _error = (data) => {
@@ -194,7 +194,7 @@ class MobileTwitter {
             storage.setLocal({
                 positionKeyname: cursor
             }, function () {
-                alert('There was an error retrieving more accounts. Please refresh the page and try again.');
+                alert('Ocorreu um erro ao recuperar mais contas. Atualize a página e tente novamente.');
             });
         }
         const _recursiveCall = () => {
@@ -341,7 +341,7 @@ function getProtectedUsers(callback) {
 
 function startBlockChain() {
     mode = 'block';
-    var result = confirm("This will block all users on this page who have the NFT-avatar flag. Are you sure?");
+    var result = confirm("Isso vai bloquear TODOS  os users nessa página que tem um NFT-avatar flag. Você tem certeza disso??");
     if (!result)
         return;
     currentProfileName = api.getProfileUsername();
@@ -356,7 +356,7 @@ function startBlockChain() {
 
 function startExportChain() {
     mode = 'export';
-    var result = confirm("Are you sure you want to export the usernames of all NFT-avatar users on this page?");
+    var result = confirm("Você tem certeza que quer exportar o nome de todos os usuários de NFT-avatar nessa página?");
     if (!result)
         return;
     currentProfileName = api.getProfileUsername();
@@ -379,7 +379,7 @@ function startImportChain(data, reverse) {
     mode = 'import'
     if (typeof data !== 'undefined') {
         var b = reverse?"unb":"b"
-        var result = confirm(`Are you sure you want to ${b}lock all ${data.users.length} users in the import?`);
+        var result = confirm(`Você tem certeza que quer ${b}loquear todos ${data.users.length} usuários na importação?`);
         if (!result)
             return;
         currentProfileName = data.connection;
@@ -475,7 +475,7 @@ function showDialog(reverse) {
                 $("#blockchain-dialog #ImportStart").parent().hide();
             }
         } catch (e) {
-            alert('There was a problem importing this data. It appears to be corrupt.');
+            alert('Ocorreu um problema ao importar esses dados. Parece estar corrompido.');
             //console.log(e);
         }
     });
