@@ -1,3 +1,9 @@
+## This information is outdated
+
+Sometime in January of 2024, Twitter discontinued the NFT-avatar feature. Therefore, the below software almost certainly does not anymore work. Notice I say "almost certainly": On occasion before Twitter has removed features from the *interface* while continuing to store the relevant data in the backend, and JavaScript running on the Twitter domain is often free to query backend information that the interface would not usually show. So it's *possible* that tools (1) and (4) below continue to work on users who *had* NFT avatars before the feature was removed. (Because the new management has both discontinued TweetDeck and made third-party apps such as the AntsStyle blocker nonviable, most likely (2) and (3) will be broken anyway.) Since I no longer use Twitter (and, in my opinion, neither should you) I have not attempted to test this.
+
+For historical purposes, here is the text that *was* here:
+
 ## How to automatically block NFT users on Twitter
 
 Twitter has a feature where registered NFT owners get a hexagonal profile border. This is silly and bad, but has an upside: It means you can now block NFT users on Twitter **automatically**, using any of the following tools.
@@ -11,7 +17,7 @@ Twitter has a feature where registered NFT owners get a hexagonal profile border
 
     **Note: This plugin is currently incompatible with uBlock Origin.** If you use uBlock Origin, you must [follow these short instructions after installation](https://twitter.com/YoshiEmblem/status/1486920290181554176) or else NoFT will do nothing.
 
-2. **[AntsStyle "NFT Artist & Cryptobro Blocker"](https://antsstyle.com/nftcryptoblocker/)**
+2. **[AntsStyle "NFT Artist & Cryptobro Blocker"](https://antsstyle.com/nftcryptoblocker/)** *(Link dead— 2024-01-12)*
 
     Works with: **All forms of Twitter, including phone apps**  
     Uses: **Block NFT users**, **mute NFT users**.  
